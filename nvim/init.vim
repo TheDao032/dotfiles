@@ -85,7 +85,9 @@ noremap <C-l> :noh<CR><C-L>
 noremap <leader>/ :Rg<CR>
 " Configure for Python development
 let g:pymode_run_bind='<F5>'
+let g:pymode_run_bind='<F1>'
 noremap <F5> <Esc>:w<CR>:!python3 %<CR>
+noremap <F1> <C-[>:term<CR>isudo /odoo/odoo-server/start.sh<CR><C-\><C-n>m<C-a>
 
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
@@ -255,5 +257,11 @@ let g:coc_global_extensions = [
   \ 'coc-tsserver',
   \ 'coc-eslint', 
   \ 'coc-prettier', 
+  \ 'coc-go', 
+  \ 'coc-vetur', 
+  \ 'coc-python', 
   \ 'coc-json', 
   \ ]
+
+" Prettier Command
+command! -nargs=0 Prettier :CocCommand prettier.formatFile

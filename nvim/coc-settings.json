@@ -1,0 +1,5 @@
+{
+  "coc.preferences.snippets.enable": true,
+  "eslint.autoFix": true,
+  "eslint.autoFixOnSave": true
+}
