@@ -63,6 +63,12 @@ Plug 'ihsanturk/neuron.vim'
 Plug 'SidOfc/mkdx'
 Plug 'tpope/vim-surround'
 Plug 'preservim/nerdtree'
+Plug 'herringtondarkholme/yats.vim'
+Plug 'posva/vim-vue'
+Plug 'prettier/vim-prettier'
+Plug 'othree/xml.vim'
+Plug 'othree/html5.vim'
+Plug 'cakebaker/scss-syntax.vim'
 " Plug 'liuchengxu/vim-which-key'
 " Plug 'plasticboy/vim-markdown' 
 
@@ -83,12 +89,12 @@ noremap <C-p> :Files<CR>
 " noremap <Leader>no :lcd ~/notes<CR>:Rg<CR>
 noremap <C-l> :noh<CR><C-L>
 noremap <leader>/ :Rg<CR>
+noremap <leader>. :NERDTreeToggle<CR>
 " Configure for Python development
 let g:pymode_run_bind='<F5>'
 let g:pymode_run_bind='<F1>'
-noremap <F5> <Esc>:w<CR>:!python3 %<CR>
+noremap <F5> <C-[>:w<CR>:!python3 %<CR>
 noremap <F1> <C-[>:term<CR>isudo /odoo/odoo-server/start.sh<CR><C-\><C-n>m<C-a>
-
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
 " start of line
@@ -256,12 +262,21 @@ let g:coc_global_extensions = [
   \ 'coc-pairs',
   \ 'coc-tsserver',
   \ 'coc-eslint', 
+  \ 'coc-tslint', 
   \ 'coc-prettier', 
   \ 'coc-go', 
   \ 'coc-vetur', 
   \ 'coc-python', 
-  \ 'coc-json', 
+  \ 'coc-json',
+  \ 'coc-css',
+  \ 'coc-tsserver',
+  \ 'coc-emmet',
+  \ 'coc-marketplace',
+  \ 'coc-html'
   \ ]
 
 " Prettier Command
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
+
+if !exists('g:vscode')
+endif
