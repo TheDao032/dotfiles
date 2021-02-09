@@ -15,7 +15,7 @@ set ignorecase
 set smartcase
 set wildmenu
 set autoindent
-set clipboard+=unnamedplus
+set clipboard=unnamedplus
 set shell=/usr/bin/zsh
 set pastetoggle=<F2>
 set scrolloff=3
@@ -45,6 +45,9 @@ call plug#begin()
 " Plug 'vimwiki/vimwiki'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'machakann/vim-highlightedyank' 
+Plug 'eslint/eslint'
+Plug 'palantir/tslint'
+Plug 'editorconfig/editorconfig-vim'
 " Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
 Plug 'morhetz/gruvbox'
 Plug 'turbio/bracey.vim'
@@ -69,6 +72,7 @@ Plug 'prettier/vim-prettier'
 Plug 'othree/xml.vim'
 Plug 'othree/html5.vim'
 Plug 'cakebaker/scss-syntax.vim'
+Plug 'burnettk/vim-angular'
 " Plug 'liuchengxu/vim-which-key'
 " Plug 'plasticboy/vim-markdown' 
 
@@ -94,7 +98,12 @@ noremap <leader>. :NERDTreeToggle<CR>
 let g:pymode_run_bind='<F5>'
 let g:pymode_run_bind='<F1>'
 noremap <F5> <C-[>:w<CR>:!python3 %<CR>
-noremap <F1> <C-[>:term<CR>isudo /odoo/odoo-server/start.sh<CR><C-\><C-n>m<C-a>
+noremap <F1> <C-[>:term<CR>isudo /odoo/odoo-server/start.sh<CR><C-\><C-n>m<S-a>
+
+" nodemon starting
+let g:pymode_run_bind='<F3>'
+noremap <F3> <C-[>:term<CR>i nodemon app<CR><C-\><C-n>m<S-b>
+
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
 " start of line
@@ -140,6 +149,20 @@ augroup END
 
 " PLUG-INS CONFIGURATION
 " ------------------------- 
+
+let g:clipboard = {
+          \   'name': 'myClipboard',
+          \   'copy': {
+          \      '+': {lines, regtype -> extend(g:, {'foo': [lines, regtype]}) },
+          \      '*': {lines, regtype -> extend(g:, {'foo': [lines, regtype]}) },
+          \    },
+          \   'paste': {
+          \      '+': {-> get(g:, 'foo', [])},
+          \      '*': {-> get(g:, 'foo', [])},
+          \   },
+          \ }
+
+let g:loaded_perl_provider = '/usr/bin/perl'
 
 let g:highlightedyank_highlight_duration = 250
 
