@@ -281,6 +281,7 @@ autocmd BufRead *.py
 "
 " Coc config
 let g:coc_global_extensions = [
+  \ 'coc-json',
   \ 'coc-snippets',
   \ 'coc-pairs',
   \ 'coc-tsserver',
@@ -295,6 +296,7 @@ let g:coc_global_extensions = [
   \ 'coc-tsserver',
   \ 'coc-emmet',
   \ 'coc-marketplace',
+  \ 'coc-angular',
   \ 'coc-html'
   \ ]
 
