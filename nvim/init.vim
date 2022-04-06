@@ -16,7 +16,7 @@ set smartcase
 set wildmenu
 set autoindent
 set clipboard=unnamedplus
-set shell=/usr/bin/zsh
+set shell=/bin/zsh
 set pastetoggle=<F2>
 set scrolloff=3
 
@@ -29,6 +29,8 @@ set shiftwidth=4
 set undodir=~/.vim/undodir
 set undofile
 set foldmethod=syntax 
+set directory=.,$TEMP
+set pyxversion=3
 
 let mapleader = " "
 
@@ -48,7 +50,7 @@ Plug 'machakann/vim-highlightedyank'
 Plug 'eslint/eslint'
 Plug 'palantir/tslint'
 Plug 'editorconfig/editorconfig-vim'
-" Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
+Plug 'ThePrimeagen/vim-be-good', {'do': './install.sh'}
 Plug 'morhetz/gruvbox'
 Plug 'turbio/bracey.vim'
 " Plug 'shushcat/vim-minimd'
@@ -73,6 +75,9 @@ Plug 'othree/xml.vim'
 Plug 'othree/html5.vim'
 Plug 'cakebaker/scss-syntax.vim'
 Plug 'burnettk/vim-angular'
+Plug 'SirVer/ultisnips' | Plug 'phux/vim-snippets'
+Plug 'phpactor/phpactor', { 'do': ':call phpactor#Update()', 'for': 'php'}
+Plug 'phpactor/ncm2-phpactor', {'for': 'php'}
 " Plug 'liuchengxu/vim-which-key'
 " Plug 'plasticboy/vim-markdown' 
 
@@ -101,8 +106,13 @@ noremap <F5> <C-[>:w<CR>:!python3 %<CR>
 noremap <F1> <C-[>:term<CR>isudo /odoo/odoo-server/start.sh<CR><C-\><C-n>m<S-a>
 
 " nodemon starting
+let g:pymode_run_bind='<F2>'
+noremap <F2> <C-[>:term<CR>i nodemon app<CR><C-\><C-n>m<S-q>
+
+" ng serve starting
 let g:pymode_run_bind='<F3>'
-noremap <F3> <C-[>:term<CR>i nodemon app<CR><C-\><C-n>m<S-b>
+noremap <F3> <C-[>:term<CR>i ng serve<CR><C-\><C-n>m<S-w>
+
 
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
@@ -162,7 +172,7 @@ let g:clipboard = {
           \   },
           \ }
 
-let g:loaded_perl_provider = '/usr/bin/perl'
+let g:perl_host_prog = '/usr/bin/perl'
 
 let g:highlightedyank_highlight_duration = 250
 
@@ -236,6 +246,20 @@ vmap <Plug> <Plug>(mkdx-text-italic-v)
  " Highlighting priority (default: 10)
  "   Set it to -1 not to overrule hlsearch
  let g:limelight_priority = -1
+
+ " Python Provider Path
+ let g:python_host_prog  = '/Users/cv14004mac-3g/opt/anaconda3/bin/python'
+ let g:loaded_python_provider = 0
+
+ " Perl Provider Path
+ let g:loaded_perl_provider = 0
+ let g:ruby_host_prog = '/usr/bin/ruby'
+ " " Python3 Provider Path
+ " let g:python3_host_prog = '/usr/bin/python3'
+ " let g:loaded_python3_provider = 0
+
+ " NERDTreeToggle Configure "
+ let g:NERDTreeWinSize=60
 
  function! s:goyo_enter()
  	set noshowmode
