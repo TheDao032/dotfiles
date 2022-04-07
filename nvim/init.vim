@@ -93,11 +93,16 @@ map Y y$"
 inoremap <C-U> <C-G>u<C-U>
 nnoremap <Leader>g :Goyo<CR>
 noremap <Leader>w :set wrap!<CR>
+" Files Opened History
 noremap <C-h> :History<CR>
+" Find And Open Files
 noremap <C-p> :Files<CR>
 " noremap <Leader>no :lcd ~/notes<CR>:Rg<CR>
+" Clear Searching
 noremap <C-l> :noh<CR><C-L>
+" Ripgrep (Search File By Words)
 noremap <leader>/ :Rg<CR>
+" Open Folder Tree
 noremap <leader>. :NERDTreeToggle<CR>
 " Configure for Python development
 let g:pymode_run_bind='<F5>'
@@ -113,6 +118,11 @@ noremap <F2> <C-[>:term<CR>i nodemon app<CR><C-\><C-n>m<S-q>
 let g:pymode_run_bind='<F3>'
 noremap <F3> <C-[>:term<CR>i ng serve<CR><C-\><C-n>m<S-w>
 
+" Fold Configure
+" FoldOpen noremap
+noremap <Leader>fo :foldopen<CR>
+" FoldClose noremap
+noremap <Leader>fc :foldclose<CR>
 
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
@@ -258,8 +268,8 @@ vmap <Plug> <Plug>(mkdx-text-italic-v)
  " let g:python3_host_prog = '/usr/bin/python3'
  " let g:loaded_python3_provider = 0
 
- " NERDTreeToggle Configure "
- let g:NERDTreeWinSize=60
+ " NERDTreeToggle Configure
+ let g:NERDTreeWinSize = 50
 
  function! s:goyo_enter()
  	set noshowmode
@@ -305,7 +315,6 @@ autocmd BufRead *.py
 "
 " Coc config
 let g:coc_global_extensions = [
-  \ 'coc-json',
   \ 'coc-snippets',
   \ 'coc-pairs',
   \ 'coc-tsserver',
@@ -320,7 +329,6 @@ let g:coc_global_extensions = [
   \ 'coc-tsserver',
   \ 'coc-emmet',
   \ 'coc-marketplace',
-  \ 'coc-angular',
   \ 'coc-html'
   \ ]
 
