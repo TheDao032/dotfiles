@@ -37,8 +37,8 @@ let mapleader = " "
 " Plug-Ins Installation via vim-plug
 " -------------------------------
 if empty(glob('~/.local/share/nvim/site/autoload/plug.vim'))
-  silent !curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs
-    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  silent !curl -fLo "${XDG_DATA_HOME:-$HOME/.local/share}"/nvim/site/autoload/plug.vim --create-dirs \
+       https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
@@ -120,9 +120,9 @@ noremap <F3> <C-[>:term<CR>i ng serve<CR><C-\><C-n>m<S-w>
 
 " Fold Configure
 " FoldOpen noremap
-noremap <Leader>fo :foldopen<CR>
+noremap <Leader>fn :foldopen<CR>
 " FoldClose noremap
-noremap <Leader>fc :foldclose<CR>
+noremap <Leader>fe :foldclose<CR>
 
 " For Emacs-style editing on the command-line: >
 " --------------------------------------------
@@ -258,15 +258,16 @@ vmap <Plug> <Plug>(mkdx-text-italic-v)
  let g:limelight_priority = -1
 
  " Python Provider Path
- let g:python_host_prog  = '/Users/cv14004mac-3g/opt/anaconda3/bin/python'
- let g:loaded_python_provider = 0
+ " let g:python_host_prog  = '/usr/bin/python'
+ " let g:loaded_python_provider = 0
 
  " Perl Provider Path
  let g:loaded_perl_provider = 0
  let g:ruby_host_prog = '/usr/bin/ruby'
- " " Python3 Provider Path
- " let g:python3_host_prog = '/usr/bin/python3'
- " let g:loaded_python3_provider = 0
+
+ " Python3 Provider Path
+ let g:python3_host_prog = '/usr/bin/python3'
+ let g:loaded_python3_provider = 0
 
  " NERDTreeToggle Configure
  let g:NERDTreeWinSize = 50
