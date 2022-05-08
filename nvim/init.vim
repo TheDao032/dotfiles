@@ -182,7 +182,18 @@ let g:clipboard = {
           \   },
           \ }
 
-let g:perl_host_prog = '/usr/bin/perl'
+" let g:clipboard = {
+"           \   'name': 'myClipboard',
+"           \   'copy': {
+"           \      '+': ['tmux', 'load-buffer', '-'],
+"           \      '*': ['tmux', 'load-buffer', '-'],
+"           \    },
+"           \   'paste': {
+"           \      '+': ['tmux', 'save-buffer', '-'],
+"           \      '*': ['tmux', 'save-buffer', '-'],
+"           \   },
+"           \   'cache_enabled': 1,
+"           \ }
 
 let g:highlightedyank_highlight_duration = 250
 
@@ -258,19 +269,24 @@ vmap <Plug> <Plug>(mkdx-text-italic-v)
  let g:limelight_priority = -1
 
  " Python Provider Path
- " let g:python_host_prog  = '/usr/bin/python'
- " let g:loaded_python_provider = 0
+ let g:python_host_prog  = '/usr/bin/python'
+ let g:loaded_python_provider = 0
 
  " Perl Provider Path
- let g:loaded_perl_provider = 0
+ let g:perl_host_prog = '/usr/bin/perl'
+ let g:loaded_perl_provider = 1
+
+ " Ruby Provider Path
  let g:ruby_host_prog = '/usr/bin/ruby'
 
  " Python3 Provider Path
- let g:python3_host_prog = '/usr/bin/python3'
- let g:loaded_python3_provider = 0
+ " let g:python3_host_prog = '/usr/bin/python3'
+ " let g:loaded_python3_provider = 1
 
  " NERDTreeToggle Configure
  let g:NERDTreeWinSize = 50
+
+let g:loaded_node_provider = 0
 
  function! s:goyo_enter()
  	set noshowmode
