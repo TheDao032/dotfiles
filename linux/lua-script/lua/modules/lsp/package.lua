@@ -34,7 +34,7 @@ package({
   dependencies = {
     {
       'williamboman/mason.nvim',
-      build = ':MasonUpdate',
+      build = 'MasonUpdate',
     },
     { 'williamboman/mason-lspconfig.nvim' },
     { 'ray-x/lsp_signature.nvim' },
