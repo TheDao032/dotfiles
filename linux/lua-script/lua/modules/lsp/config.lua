@@ -320,7 +320,54 @@ function config.nvim_lsp()
     --   end,
     -- },
   })
+end
 
+function config.null_ls()
+  local null_ls = require('null-ls')
+
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/formatting
+  local formatting = null_ls.builtins.formatting
+
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/diagnostics
+  local diagnostics = null_ls.builtins.diagnostics
+
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/completion
+  local completion = null_ls.builtins.completion
+
+  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/code_actions
+  local code_actions = null_ls.builtins.code_actions
+
+  local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
+
+  null_ls.setup({
+    debug = true,
+    sources = {
+      formatting.terraform_fmt,
+      formatting.hclfmt,
+      formatting.prettier.with({ extra_args = { '--no-semi', '--single-quote', '--jsx-single-quote' } }),
+      formatting.eslint,
+      formatting.stylua,
+      formatting.cljstyle,
+      diagnostics.msspell,
+      diagnostics.eslint,
+      diagnostics.clj_kondo,
+      completion.spell,
+      code_actions.gitsigns,
+    },
+    on_attach = function(client, bufnr)
+      if client.supports_method('textDocument/formatting') then
+        vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+        vim.api.nvim_create_autocmd('BufWritePre', {
+          group = augroup,
+          buffer = bufnr,
+          callback = function()
+            vim.lsp.buf.format({ bufnr = bufnr, async = true })
+            vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
+          end,
+        })
+      end
+    end,
+  })
 end
 
 function config.nvim_lspsaga()

@@ -42,6 +42,14 @@ package({
   config = conf.nvim_lsp,
 })
 
+package({
+  'jose-elias-alvarez/null-ls.nvim',
+  dependencies = { -- optional packages
+    'nvim-lua/plenary.nvim',
+  },
+  config = conf.null_ls,
+})
+
 --[[ package({
   'nvimdev/lspsaga.nvim',
   cmd = 'Lspsaga term_toggle',
