@@ -2,6 +2,7 @@ local config = {}
 
 function config.nvim_cmp()
   local cmp = require('cmp')
+  local luasnip = require("luasnip")
 
   cmp.setup({
     snippet = {
@@ -19,13 +20,33 @@ function config.nvim_cmp()
       ['<C-Space>'] = cmp.mapping.complete(),
       ['<C-e>'] = cmp.mapping.abort(),
       ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+      ["<Right>"] = cmp.mapping.confirm({
+        behavior = cmp.ConfirmBehavior.Replace,
+        select = true,
+      }),
+      ["<Tab>"] = cmp.mapping(function(fallback)
+        if luasnip.expand_or_jumpable() then
+          luasnip.expand_or_jump()
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
+      ["<S-Tab>"] = cmp.mapping(function(fallback)
+        if luasnip.jumpable(-1) then
+          luasnip.jump(-1)
+        else
+          fallback()
+        end
+      end, { "i", "s" }),
     }),
     sources = cmp.config.sources({
+      { name = "nvim_lua" },
       { name = 'nvim_lsp' },
       -- { name = 'vsnip' }, -- For vsnip users.
       { name = 'luasnip' }, -- For luasnip users.
       -- { name = 'ultisnips' }, -- For ultisnips users.
       -- { name = 'snippy' }, -- For snippy users.
+      { name = "path" },
     }, {
       { name = 'buffer' },
     }),
