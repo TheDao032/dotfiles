@@ -55,7 +55,7 @@ package({
 package({
   'ray-x/navigator.lua',
   dependencies = {
-    { 'ray-x/guihua.lua',               run = 'cd lua/fzy && make' },
+    { 'ray-x/guihua.lua', run = 'cd lua/fzy && make' },
     { 'neovim/nvim-lspconfig' },
     { 'nvim-treesitter/nvim-treesitter' },
   },
