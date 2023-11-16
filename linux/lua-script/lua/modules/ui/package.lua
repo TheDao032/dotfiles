@@ -42,6 +42,8 @@ local enable_indent_filetype = {
 
 package({
   'lukas-reineke/indent-blankline.nvim',
+  main = 'ibl',
+  opts = {},
   ft = enable_indent_filetype,
   config = conf.indent_blankline,
 })

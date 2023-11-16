@@ -19,7 +19,7 @@ function config.nvim_lsp()
     'yamlls',
     'terraformls',
     'tflint',
-    'terraform_lsp',
+    -- 'terraform_lsp',
   }
 
   local mason_language_servers = {
@@ -267,7 +267,6 @@ function config.nvim_lsp()
       },
     },
   })
-
 end
 
 function config.null_ls()
@@ -310,7 +309,7 @@ function config.null_ls()
           group = augroup,
           buffer = bufnr,
           callback = function()
-            -- vim.lsp.buf.format({ bufnr = bufnr, async = true })
+            vim.lsp.buf.format({ bufnr = bufnr, async = true })
             vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
           end,
         })
