@@ -15,6 +15,14 @@ package({
 
 package({ 'L3MON4D3/LuaSnip', event = 'InsertCharPre', config = conf.lua_snip })
 
+package({
+  'jose-elias-alvarez/null-ls.nvim',
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+  },
+  config = conf.null_ls,
+})
+
 -- package({
 --   'ray-x/go.nvim',
 --   dependencies = { -- optional packages

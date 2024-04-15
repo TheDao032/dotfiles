@@ -16,11 +16,11 @@ function config.nvim_lsp()
     'solargraph',
     'sqlls',
     'rust_analyzer',
-    'yamlls',
     'terraformls',
-    'tflint',
-    'helm_ls',
     'terraform_lsp',
+    -- 'yamlls',
+    'helm_ls',
+    'lemminx',
   }
 
   local mason_language_servers = {
@@ -33,13 +33,14 @@ function config.nvim_lsp()
     'solargraph',
     'sqlls',
     'rust_analyzer',
-    'yamlls',
     'terraformls',
-    'tflint',
     'tfsec',
     'helm_ls',
-    -- 'gopls',
     'lua_ls',
+    -- 'gopls',
+    'yamlls',
+    -- 'groovyls',
+    'lemminx',
   }
 
   -- Language servers to eagerly install
@@ -48,8 +49,10 @@ function config.nvim_lsp()
   })
 
   local capabilities = require('cmp_nvim_lsp').default_capabilities()
-  -- local capabilities = vim.lsp.protocol.make_client_capabilities()
+
   local lspconfig = require('lspconfig')
+  local configs = require('lspconfig.configs')
+  local util = require('lspconfig.util')
 
   vim.keymap.set('n', '<space>of', vim.diagnostic.open_float, new_opts(noremap, silent, 'DIAGNOSTIC: Open Float'))
   vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, new_opts(noremap, silent, 'DIAGNOSTIC: Goto Previous Diagnostic'))
@@ -257,54 +260,18 @@ function config.nvim_lsp()
       },
     },
   })
-end
 
-function config.null_ls()
-  local null_ls = require('null-ls')
-
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/formatting
-  local formatting = null_ls.builtins.formatting
-
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/diagnostics
-  local diagnostics = null_ls.builtins.diagnostics
-
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/completion
-  local completion = null_ls.builtins.completion
-
-  -- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/lua/null-ls/builtins/code_actions
-  local code_actions = null_ls.builtins.code_actions
-
-  local augroup = vim.api.nvim_create_augroup('LspFormatting', {})
-
-  null_ls.setup({
-    debug = true,
-    sources = {
-      formatting.terraform_fmt.with({
-        filetypes = { 'terraform', 'tf', 'hcl' },
-      }),
-      formatting.prettier.with({ extra_args = { '--no-semi', '--single-quote', '--jsx-single-quote' } }),
-      formatting.eslint,
-      formatting.stylua,
-      formatting.cljstyle,
-      diagnostics.msspell,
-      diagnostics.eslint,
-      diagnostics.clj_kondo,
-      completion.spell,
-      code_actions.gitsigns,
+  lspconfig.yamlls.setup({
+    on_attach = on_attach,
+    settings = {
+      yaml = {
+        schemas = {
+          ['https://raw.githubusercontent.com/instrumenta/kubernetes-json-schema/master/v1.18.0-standalone-strict/all.json'] =
+          '/*.k8s.yaml',
+          kubernetes = 'globPattern',
+        },
+      },
     },
-    on_attach = function(client, bufnr)
-      if client.supports_method('textDocument/formatting') then
-        vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
-        vim.api.nvim_create_autocmd('BufWritePre', {
-          group = augroup,
-          buffer = bufnr,
-          callback = function()
-            -- vim.lsp.buf.format({ bufnr = bufnr, async = true })
-            vim.lsp.buf.code_action({ context = { only = { 'source.organizeImports' } }, apply = true })
-          end,
-        })
-      end
-    end,
   })
 end
 

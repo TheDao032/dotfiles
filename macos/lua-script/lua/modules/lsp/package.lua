@@ -10,11 +10,3 @@ package({
   },
   config = conf.nvim_lsp,
 })
-
-package({
-  'jose-elias-alvarez/null-ls.nvim',
-  dependencies = {
-    'nvim-lua/plenary.nvim',
-  },
-  config = conf.null_ls,
-})
