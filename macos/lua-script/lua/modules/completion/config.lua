@@ -106,7 +106,7 @@ function config.null_ls()
       formatting.cljstyle,
       formatting.terraform_fmt,
       formatting.hclfmt,
-      diagnostics.msspell,
+      -- diagnostics.msspell,
       diagnostics.eslint,
       diagnostics.clj_kondo,
       completion.spell,

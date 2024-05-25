@@ -21,6 +21,7 @@ function config.nvim_lsp()
     -- 'yamlls',
     'helm_ls',
     'lemminx',
+    'ansiblels',
   }
 
   local mason_language_servers = {
@@ -34,13 +35,13 @@ function config.nvim_lsp()
     'sqlls',
     'rust_analyzer',
     'terraformls',
-    'tfsec',
     'helm_ls',
     'lua_ls',
-    -- 'gopls',
+    'gopls',
     'yamlls',
     -- 'groovyls',
     'lemminx',
+    'ansiblels',
   }
 
   -- Language servers to eagerly install

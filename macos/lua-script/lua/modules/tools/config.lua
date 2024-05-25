@@ -234,7 +234,9 @@ function config.nvim_dap()
 end
 
 function config.toggle_term()
-  require('toggleterm').setup()
+  require('toggleterm').setup({
+    size=16
+  })
   local Terminal = require('toggleterm.terminal').Terminal
   local lazygit = Terminal:new({
     cmd = 'lazygit',
