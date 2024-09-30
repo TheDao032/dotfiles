@@ -1,8 +1,9 @@
 local M = {}
 local lspconfig = require('lspconfig')
 
-M.capabilities =
-  vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
+M.capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- M.capabilities =
+--   vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
 
 function M._attach(client, bufnr)
   vim.opt.omnifunc = 'v:lua.vim.lsp.omnifunc'
@@ -156,6 +157,11 @@ local servers = {
   'dockerls',
   'terraformls',
   'ansiblels',
+  'ruby_lsp',
+  'yamlls',
+  'helm_ls',
+  'java_language_server',
+  -- 'ast_grep',
 }
 
 for _, server in ipairs(servers) do

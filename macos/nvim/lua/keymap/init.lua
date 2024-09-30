@@ -44,7 +44,7 @@ map.n({
   ['<Leader>e'] = cmd('NvimTreeToggle'),
   ['<Leader>T'] = cmd('ToggleTerm'),
   --lazy-packer
-  ['<Leader>lu'] = cmd('Lazy update'),
+  -- ['<Leader>lu'] = cmd('Lazy update'),
 })
 
 --template.nvim

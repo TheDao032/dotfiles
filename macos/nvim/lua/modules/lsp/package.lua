@@ -21,7 +21,7 @@ packadd({
     require('modules.lsp.backend')
     require('modules.lsp.frontend')
   end,
-  dependencies = { 'williamboman/mason.nvim', 'williamboman/mason-lspconfig.nvim' },
+  dependencies = { 'williamboman/mason.nvim', 'williamboman/mason-lspconfig.nvim', 'hrsh7th/nvim-cmp' },
 })
 
 -- packadd({
@@ -55,28 +55,29 @@ packadd({
   end,
 })
 
-packadd({
-  'nvimdev/epo.nvim',
-  event = 'LspAttach',
-  dev = false,
-  config = function()
-    require('epo').setup()
-    -- require('epo').setup({
-    --   -- fuzzy match
-    --   fuzzy = false,
-    --   -- increase this value can aviod trigger complete when delete character.
-    --   debounce = 50,
-    --   -- when completion confrim auto show a signature help floating window.
-    --   signature = true,
-    --   -- vscode style json snippet path
-    --   snippet_path = nil,
-    --   -- border for lsp signature popup, :h nvim_open_win
-    --   signature_border = 'single',
-    --   -- lsp kind formatting, k is kind string "Field", "Struct", "Keyword" etc.
-    --   kind_format = function(k)
-    --     return k
-    --   end,
-    -- })
-    -- vim.o.completeopt = 'menu,menuone,noinsert,popup'
-  end,
-})
+-- packadd({
+--   'nvimdev/epo.nvim',
+--   event = 'LspAttach',
+--   dev = false,
+--   config = function()
+--     require('epo').setup()
+--     -- require('epo').setup({
+--     --   -- fuzzy match
+--     --   fuzzy = false,
+--     --   -- increase this value can aviod trigger complete when delete character.
+--     --   debounce = 50,
+--     --   -- when completion confrim auto show a signature help floating window.
+--     --   signature = true,
+--     --   -- vscode style json snippet path
+--     --   snippet_path = nil,
+--     --   -- border for lsp signature popup, :h nvim_open_win
+--     --   signature_border = 'single',
+--     --   -- lsp kind formatting, k is kind string "Field", "Struct", "Keyword" etc.
+--     --   kind_format = function(k)
+--     --     return k
+--     --   end,
+--     -- })
+--     -- vim.o.completeopt = 'menu,menuone,noinsert,popup'
+--   end,
+-- })
+--

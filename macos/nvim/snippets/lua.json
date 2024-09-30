@@ -77,10 +77,16 @@
     "prefix": "forp",
     "scope": "source.lua"
   },
-  "fn": {
-    "body": "function ${1:function_name}(${2:...})\n\t${0:-- body}\nend",
+  "fun": {
+    "body": "function ${1:function_name}( ${2:...} )\n\t${0:-- body}\nend",
     "description": "function",
-    "prefix": "fn",
+    "prefix": "fun",
+    "scope": "source.lua"
+  },
+  "function": {
+    "body": "function ${1:function_name}( ${2:...} )\n\t${0:-- body}\nend",
+    "description": "function",
+    "prefix": "function",
     "scope": "source.lua"
   },
   "getfenv": {

@@ -84,11 +84,40 @@ packadd({
   config = conf.toggle_term,
 })
 
+-- packadd({
+--   'zbirenbaum/copilot.lua',
+--   cmd = 'Copilot',
+--   event = 'InsertEnter',
+--   config = function()
+--     require('copilot').setup()
+--   end,
+-- })
+
 packadd({
-  'zbirenbaum/copilot.lua',
-  cmd = 'Copilot',
-  event = 'InsertEnter',
+  'Exafunction/codeium.nvim',
+  event = 'BufEnter */*',
   config = function()
-    require('copilot').setup()
+    require('codeium').setup()
   end,
+  dependencies = {
+    'nvim-lua/plenary.nvim',
+    'hrsh7th/nvim-cmp',
+  },
+})
+
+packadd({
+  'hrsh7th/nvim-cmp',
+  dependencies = {
+    'hrsh7th/cmp-cmdline',
+    'hrsh7th/cmp-nvim-lsp',
+  },
+  config = conf.nvim_cmp,
+})
+
+packadd({
+  'L3MON4D3/LuaSnip',
+  -- follow latest release.
+  version = 'v2.*', -- Replace <CurrentMajor> by the latest released major (first number of latest release)
+  -- install jsregexp (optional!).
+  build = 'make install_jsregexp',
 })

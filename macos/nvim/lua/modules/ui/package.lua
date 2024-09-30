@@ -21,11 +21,11 @@ packadd({
   dependencies = { 'nvim-tree/nvim-web-devicons' },
 })
 
-packadd({
-  'nvimdev/modeline.nvim',
-  event = 'BufEnter',
-  config = conf.modeline,
-})
+-- packadd({
+--   'nvimdev/modeline.nvim',
+--   event = 'BufEnter */*',
+--   config = conf.modeline,
+-- })
 
 packadd({
   'lewis6991/gitsigns.nvim',

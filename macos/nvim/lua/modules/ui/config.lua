@@ -72,6 +72,7 @@ function config.nvim_tree()
       width = 45,
     },
   })
+  -- require('nvim-tree').setup()
 end
 
 return config

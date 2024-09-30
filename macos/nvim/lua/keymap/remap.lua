@@ -107,11 +107,11 @@ map.i('<CR>', function()
   return vim.fn.pumvisible() == 1 and '<C-y>' or _G.PairMate.cr()
 end, { expr = true })
 
-map.i('<C-e>', function()
-  if vim.fn.pumvisible() == 1 then
-    require('epo').disable_trigger()
-    return '<c-e>'
-  else
-    return '<End>'
-  end
-end, { expr = true })
+-- map.i('<C-e>', function()
+--   if vim.fn.pumvisible() == 1 then
+--     require('epo').disable_trigger()
+--     return '<c-e>'
+--   else
+--     return '<End>'
+--   end
+-- end, { expr = true })
