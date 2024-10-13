@@ -156,6 +156,7 @@ local servers = {
   'zls',
   'dockerls',
   'terraformls',
+  'terraform_lsp',
   'ansiblels',
   'ruby_lsp',
   'yamlls',
