@@ -83,7 +83,7 @@ function config.nvim_treesitter()
 
   --set indent for jsx tsx
   vim.api.nvim_create_autocmd('FileType', {
-    pattern = { 'javascriptreact', 'typescriptreact' },
+    pattern = { 'javascriptreact', 'typescriptreact', 'git', 'toml', 'lua', 'text', 'yaml' },
     callback = function(opt)
       vim.bo[opt.buf].indentexpr = 'nvim_treesitter#indent()'
     end,

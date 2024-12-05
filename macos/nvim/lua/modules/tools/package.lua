@@ -17,7 +17,7 @@ packadd({
 
 packadd({
   'nvimdev/guard.nvim',
-  ft = { 'c', 'cpp', 'rust', 'lua', 'go', 'typescript', 'javascript', 'javascriptreact' },
+  ft = { 'c', 'cpp', 'rust', 'lua', 'go', 'typescript', 'javascript', 'javascriptreact', 'markdown' },
   config = conf.guard,
   dependencies = {
     { 'nvimdev/guard-collection' },
@@ -121,3 +121,14 @@ packadd({
   -- install jsregexp (optional!).
   build = 'make install_jsregexp',
 })
+
+packadd({
+  'mhartington/formatter.nvim',
+  config = conf.formatter_nvim,
+})
+
+-- packadd({
+--   'stevearc/conform.nvim',
+--   opts = {},
+--   config = conf.nvim_conform,
+-- })

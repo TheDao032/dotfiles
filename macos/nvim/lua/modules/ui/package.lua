@@ -21,12 +21,6 @@ packadd({
   dependencies = { 'nvim-tree/nvim-web-devicons' },
 })
 
--- packadd({
---   'nvimdev/modeline.nvim',
---   event = 'BufEnter */*',
---   config = conf.modeline,
--- })
-
 packadd({
   'lewis6991/gitsigns.nvim',
   event = 'BufEnter */*',
@@ -45,5 +39,11 @@ packadd({
   'nvim-tree/nvim-tree.lua',
   cmd = 'NvimTreeToggle',
   config = conf.nvim_tree,
+  dependencies = { 'nvim-tree/nvim-web-devicons' },
+})
+
+packadd({
+  'nvim-lualine/lualine.nvim',
+  config = conf.nvim_lualine,
   dependencies = { 'nvim-tree/nvim-web-devicons' },
 })

@@ -24,17 +24,6 @@ packadd({
   dependencies = { 'williamboman/mason.nvim', 'williamboman/mason-lspconfig.nvim', 'hrsh7th/nvim-cmp' },
 })
 
--- packadd({
---   'neovim/nvim-lspconfig',
---   ft = vim.g.my_program_ft,
---   config = function()
---     local i = '■'
---     vim.diagnostic.config({ signs = { text = { i, i, i, i } } })
---     require('modules.lsp.backend')
---     require('modules.lsp.frontend')
---   end,
--- })
-
 packadd({
   'nvimdev/lspsaga.nvim',
   event = 'LspAttach',
@@ -60,24 +49,21 @@ packadd({
 --   event = 'LspAttach',
 --   dev = false,
 --   config = function()
---     require('epo').setup()
---     -- require('epo').setup({
---     --   -- fuzzy match
---     --   fuzzy = false,
---     --   -- increase this value can aviod trigger complete when delete character.
---     --   debounce = 50,
---     --   -- when completion confrim auto show a signature help floating window.
---     --   signature = true,
---     --   -- vscode style json snippet path
---     --   snippet_path = nil,
---     --   -- border for lsp signature popup, :h nvim_open_win
---     --   signature_border = 'single',
---     --   -- lsp kind formatting, k is kind string "Field", "Struct", "Keyword" etc.
---     --   kind_format = function(k)
---     --     return k
---     --   end,
---     -- })
---     -- vim.o.completeopt = 'menu,menuone,noinsert,popup'
+--     vim.opt.completeopt = 'menu,menuone,noselect,popup'
+--     -- require('epo').setup()
+--     require('epo').setup({
+--       -- fuzzy match
+--       fuzzy = false,
+--       -- increase this value can aviod trigger complete when delete character.
+--       debounce = 50,
+--       -- when completion confrim auto show a signature help floating window.
+--       signature = false,
+--       -- border for lsp signature popup, :h nvim_open_win
+--       signature_border = 'rounded',
+--       -- lsp kind formatting, k is kind string "Field", "Struct", "Keyword" etc.
+--       kind_format = function(k)
+--         return k:lower():sub(1, 1)
+--       end,
+--     })
 --   end,
 -- })
---
