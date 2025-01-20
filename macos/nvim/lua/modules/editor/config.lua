@@ -69,6 +69,9 @@ function config.nvim_treesitter()
       'jsonc',
       'vimdoc',
     },
+
+    auto_install = true,
+
     highlight = {
       enable = true,
       disable = function(_, buf)

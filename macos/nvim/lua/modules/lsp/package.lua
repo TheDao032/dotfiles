@@ -1,13 +1,23 @@
+local conf = require('modules.lsp.config')
+
+packadd({
+  'nvim-java/nvim-java',
+  config = conf.nvim_java,
+  opts = {
+    registries = {
+      'github:nvim-java/mason-registry',
+      'github:mason-org/mason-registry',
+    },
+  },
+  dependencies = { 'williamboman/mason-lspconfig.nvim' },
+})
+
 packadd({
   'neovim/nvim-lspconfig',
   ft = vim.g.my_program_ft,
   config = function()
     local i = '■'
     vim.diagnostic.config({ signs = { text = { i, i, i, i } } })
-    require('mason').setup()
-    require('mason-lspconfig').setup({
-      automatic_installation = true,
-    })
     -- require('nvim-lsp-installer').setup({
     --   automatic_installation = true, -- automatically detect which servers to install (based on which servers are set up via lspconfig)
     --   ui = {
@@ -21,7 +31,7 @@ packadd({
     require('modules.lsp.backend')
     require('modules.lsp.frontend')
   end,
-  dependencies = { 'williamboman/mason.nvim', 'williamboman/mason-lspconfig.nvim', 'hrsh7th/nvim-cmp' },
+  dependencies = { 'hrsh7th/nvim-cmp' },
 })
 
 packadd({
