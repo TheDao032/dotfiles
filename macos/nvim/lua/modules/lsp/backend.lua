@@ -1,17 +1,29 @@
 local M = {}
+-- local au = vim.api.nvim_create_autocmd
 local lspconfig = require('lspconfig')
-local augroup = vim.api.nvim_create_augroup
-local autocmd = vim.api.nvim_create_autocmd
-augroup('__formatter__', { clear = true })
 
-M.capabilities = require('cmp_nvim_lsp').default_capabilities()
--- M.capabilities =
---   vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
+-- local augroup = vim.api.nvim_create_augroup
+local autocmd = vim.api.nvim_create_autocmd
+-- augroup('__formatter__', { clear = true })
+local augroup = vim.api.nvim_create_augroup('LspFormatting', { clear = true })
+
+-- M.capabilities = require('cmp_nvim_lsp').default_capabilities()
+M.capabilities =
+  vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
+
+autocmd('LspAttach', {
+  callback = function(args)
+    local client = vim.lsp.get_clients({ id = args.data.client_id })[1]
+    client.server_capabilities.semanticTokensProvider = nil
+    client.server_capabilities.documentFormattingProvider = false
+  end,
+})
 
 function M._attach(client, bufnr)
   vim.opt.omnifunc = 'v:lua.vim.lsp.omnifunc'
   -- vim.lsp.completion.enable(true, client.id, bufnr, { autotrigger = true })
-  client.server_capabilities.semanticTokensProvider = nil
+  -- client.server_capabilities.semanticTokensProvider = nil
+  -- client.server_capabilities.documentFormattingProvider = false
   local original = vim.notify
   local mynotify = function(msg, level, opts)
     if msg == 'No code actions available' or msg:find('overly') then
@@ -22,9 +34,14 @@ function M._attach(client, bufnr)
   vim.notify = mynotify
 
   autocmd('BufWritePost', {
-    group = '__formatter__',
+    group = augroup,
     buffer = bufnr,
     command = ':FormatWrite',
+  })
+
+  autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+    pattern = '*',
+    command = 'checktime',
   })
 end
 
@@ -160,6 +177,18 @@ lspconfig.rust_analyzer.setup({
   },
 })
 
+-- lspconfig.puppet.setup({
+--   cmd = { 'puppet-languagesever', '--stdio' },
+--   filetypes = { 'puppet' },
+--   root_dir = lspconfig.util.root_pattern(unpack({
+--     'manifests',
+--     '.puppet-lint.rc',
+--     'hiera.yaml',
+--     '.git',
+--   })),
+--   single_file_support = true,
+-- })
+
 local servers = {
   'bashls',
   'zls',
@@ -171,6 +200,7 @@ local servers = {
   'yamlls',
   'helm_ls',
   'jdtls',
+  'puppet',
   -- 'ast_grep',
 }
 
