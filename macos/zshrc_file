@@ -187,34 +187,6 @@ RPROMPT='[%{$fg_bold[blue]%} %D{%y/%m/%f} |%@ %{$reset_color%}]'
 # Path
 export PATH=$GOROOT/bin:$GOPATH/bin:/usr/local/sbin:/usr/local/bin:$HOME/.local/bin:$OPENJDKPATH/bin:$PERLPATH/bin:$POSTGRESQL_PATH/bin:$MASON_PATH/bin:$HOME/.venv/bin:/opt/puppetlabs/bin:${ASDF_DATA_DIR:-$HOME/.asdf}/shims:/Users/thedao/Documents/puppetlabs/puppet-editor-services:$PATH
 
-# hle209 Subscription
-# export ARM_CLIENT_ID="e1b59024-0f5c-4332-8fd6-72e0191c23c2"
-# export ARM_CLIENT_SECRET="7f_8Q~ar3aVtz5ESfwVHm8X7UoXQnrZBbgCsUdmt"
-# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
-# export ARM_SUBSCRIPTION_ID="b31a8b01-4f47-4fd6-b9a4-3a86bd93cdba"
-# export ARM_OBJECT_ID="95acfe96-144e-4d98-ad21-03ca0e4b7bd1"
-
-# ntd Subscription
-# export ARM_CLIENT_ID="a91d9419-6568-480d-a11a-20cdf9fabb85"
-# export ARM_CLIENT_SECRET="YdJ8Q~T88GtCSWTpxMVIjnAhr4vupKr4pSd-Gcbg"
-# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
-# export ARM_SUBSCRIPTION_ID="20d064bd-1511-4e4d-a112-8d5dfa0dcd84"
-# export ARM_OBJECT_ID="95acfe96-144e-4d98-ad21-03ca0e4b7bd1"
-
-# ntd-free-account-tier (personal account)
-# export ARM_CLIENT_ID="873fbe5f-b423-4972-bf70-a6ee69404a37"
-# export ARM_CLIENT_SECRET="der8Q~V0-~YJxaSof.~yFDDghRE~.qxzrL64bcTZ"
-# export ARM_TENANT_ID="f2dc9fe4-d512-4b79-922d-133b4f44e4d7"
-# export ARM_SUBSCRIPTION_ID="4526be72-8679-4789-903a-8b796cb73a8c"
-# export ARM_OBJECT_ID="3debbdf5-bda1-4b4b-8267-d9317bd92cd5"
-
-# A perfectly normal subscription
-# export ARM_CLIENT_ID="0207f36f-fcc5-44d5-b0b0-db0b84bcced5"
-# export ARM_CLIENT_SECRET="V0f8Q~8RwWFsKOz7BCroTZDY5Y~QyF7guRwPzdy8"
-# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
-# export ARM_SUBSCRIPTION_ID="22389629-cfb6-4017-bd79-f2897c1b01e6"
-# export ARM_OBJECT_ID="e690363b-e69b-4ee2-a02c-30b1e971386d"
-
 export GITLAB_TOKEN=glpat-z7osUJa9rf_TvVyXNURD
 export GITLAB_USERNAME=nguyenmto
 export OZMO_REPO_DIR=$HOME/Documents/freelancer/meteorsops/ozmo/ozmo
