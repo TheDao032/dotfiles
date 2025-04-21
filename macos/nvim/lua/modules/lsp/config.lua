@@ -48,4 +48,11 @@ function config.nvim_java()
   })
 end
 
+-- function config.nvim_mason()
+--   require('mason').setup()
+--   require('mason-lspconfig').setup({
+--     automatic_installation = true,
+--   })
+-- end
+
 return config

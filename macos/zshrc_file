@@ -70,7 +70,10 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(
+  poetry
+  git
+)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -82,11 +85,11 @@ source $ZSH/oh-my-zsh.sh
 # export LANG=en_US.UTF-8
 
 # Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='mvim'
+fi
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
@@ -104,8 +107,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-GO_VERSION=$(go version | awk '{print $3}' | cut -c 3-)
-export GO_VERSION
+export GO_VERSION=$(go version | awk '{print $3}' | cut -c 3-)
 export GOPRIVATE=github.com/TheDao032/*
 export GOPATH=/Users/thedao/go
 export GOROOT=/usr/local/Cellar/go/$GO_VERSION/libexec
@@ -116,17 +118,129 @@ export GOROOT=/usr/local/Cellar/go/$GO_VERSION/libexec
 # export CPPFLAGS="-I/usr/local/opt/ruby/include"
 # export PKG_CONFIG_PATH="/usr/local/opt/ruby/lib/pkgconfig"
 
+if type brew &>/dev/null; then
+  FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+
+  autoload -Uz compinit
+  compinit
+fi
+
 # asdf configuration
-. /usr/local/opt/asdf/libexec/asdf.sh
+# . /usr/local/opt/asdf/libexec/asdf.sh
+export ASDF_DATA_DIR="$HOME/.asdf"
+fpath=(${ASDF_DATA_DIR:-$HOME/.asdf}/completions $fpath)
+autoload -Uz compinit && compinit
 
-# Path
-export PATH=$PATH:$GOROOT/bin:$GOPATH/bin:/usr/local/sbin
 
-autoload -U +X bashcompinit && bashcompinit
+# OpenJDK
+export OPENJDKPATH=/usr/local/opt/openjdk
+# export CPPFLAGS="-I/${OPENJDKPATH}/include"
+
+# Postgresql
+export POSTGRESQL_PATH=/usr/local/opt/postgresql@16
+export LDFLAGS="-L/usr/local/opt/postgresql@16/lib"
+export CPPFLAGS="-I/usr/local/opt/postgresql@16/include"
+
+# Mason
+export MASON_PATH=$HOME/.local/share/nvim/mason
+
+# auto-completion
+# autoload -U +X bashcompinit && bashcompinit
+# autoload -U compinit promptinit
+# promptinit
+# prompt pure
+
+# antigen bundle zsh-users/zsh-completions
+# zinit light zsh-users/zsh-completions
+
+# fpath=(${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src $fpath)
+# compinit
+# zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'
+# fpath=(/usr/local/share/zsh-completions $fpath)
+# source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Terraform
 complete -o nospace -C /usr/local/bin/terraform terraform
 
-PATH="/Users/thedao/perl5/bin${PATH:+:${PATH}}"; export PATH;
+# PATH="/Users/thedao/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERLPATH=$HOME/perl5
 PERL5LIB="/Users/thedao/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/Users/thedao/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/Users/thedao/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/thedao/perl5"; export PERL_MM_OPT;
+PERL_LOCAL_LIB_ROOT="${HOME}/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"${HOME}/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=${HOME}/perl5"; export PERL_MM_OPT;
+
+# Crontab configuration
+# export EDITOR=nvim
+
+# Term
+# export TERM=xterm
+
+# Kubernetes config
+KUBECONFIG=$HOME/.kube/config
+
+# Rust configuration
+# DYLD_LIBRARY_PATH=
+
+# PROMPT='${ret_status}%{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} %D %T % %{$reset_color%}'
+RPROMPT='[%{$fg_bold[blue]%} %D{%y/%m/%f} |%@ %{$reset_color%}]'
+
+# Path
+export PATH=$GOROOT/bin:$GOPATH/bin:/usr/local/sbin:/usr/local/bin:$HOME/.local/bin:$OPENJDKPATH/bin:$PERLPATH/bin:$POSTGRESQL_PATH/bin:$MASON_PATH/bin:$HOME/.venv/bin:/opt/puppetlabs/bin:${ASDF_DATA_DIR:-$HOME/.asdf}/shims:/Users/thedao/Documents/puppetlabs/puppet-editor-services:$PATH
+
+# hle209 Subscription
+# export ARM_CLIENT_ID="e1b59024-0f5c-4332-8fd6-72e0191c23c2"
+# export ARM_CLIENT_SECRET="7f_8Q~ar3aVtz5ESfwVHm8X7UoXQnrZBbgCsUdmt"
+# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
+# export ARM_SUBSCRIPTION_ID="b31a8b01-4f47-4fd6-b9a4-3a86bd93cdba"
+# export ARM_OBJECT_ID="95acfe96-144e-4d98-ad21-03ca0e4b7bd1"
+
+# ntd Subscription
+# export ARM_CLIENT_ID="a91d9419-6568-480d-a11a-20cdf9fabb85"
+# export ARM_CLIENT_SECRET="YdJ8Q~T88GtCSWTpxMVIjnAhr4vupKr4pSd-Gcbg"
+# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
+# export ARM_SUBSCRIPTION_ID="20d064bd-1511-4e4d-a112-8d5dfa0dcd84"
+# export ARM_OBJECT_ID="95acfe96-144e-4d98-ad21-03ca0e4b7bd1"
+
+# ntd-free-account-tier (personal account)
+# export ARM_CLIENT_ID="873fbe5f-b423-4972-bf70-a6ee69404a37"
+# export ARM_CLIENT_SECRET="der8Q~V0-~YJxaSof.~yFDDghRE~.qxzrL64bcTZ"
+# export ARM_TENANT_ID="f2dc9fe4-d512-4b79-922d-133b4f44e4d7"
+# export ARM_SUBSCRIPTION_ID="4526be72-8679-4789-903a-8b796cb73a8c"
+# export ARM_OBJECT_ID="3debbdf5-bda1-4b4b-8267-d9317bd92cd5"
+
+# A perfectly normal subscription
+# export ARM_CLIENT_ID="0207f36f-fcc5-44d5-b0b0-db0b84bcced5"
+# export ARM_CLIENT_SECRET="V0f8Q~8RwWFsKOz7BCroTZDY5Y~QyF7guRwPzdy8"
+# export ARM_TENANT_ID="93f33571-550f-43cf-b09f-cd331338d086"
+# export ARM_SUBSCRIPTION_ID="22389629-cfb6-4017-bd79-f2897c1b01e6"
+# export ARM_OBJECT_ID="e690363b-e69b-4ee2-a02c-30b1e971386d"
+
+export GITLAB_TOKEN=glpat-z7osUJa9rf_TvVyXNURD
+export GITLAB_USERNAME=nguyenmto
+export OZMO_REPO_DIR=$HOME/Documents/freelancer/meteorsops/ozmo/ozmo
+export DOCKER_VOL_HOME_DEVICE=$OZMO_REPO_DIR/ozmo_home_dir
+export KUBE_EDITOR=nvim
+
+# vagrant configurations
+export VAGRANT_DISABLE_STRICT_DEPENDENCY_ENFORCEMENT=1
+
+export AWS_DEFAULT_PROFILE=gexcon
+
+alias pyactive="source ~/.venv/bin/activate"
+
+# Function to launch Kitty with the custom layout
+# kitten @ launch --cwd=current --type=window htop
+
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/thedao/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+
+# bat configuration
+alias cat='bat --paging=never'

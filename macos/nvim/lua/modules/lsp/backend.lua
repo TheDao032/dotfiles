@@ -7,9 +7,9 @@ local autocmd = vim.api.nvim_create_autocmd
 -- augroup('__formatter__', { clear = true })
 local augroup = vim.api.nvim_create_augroup('LspFormatting', { clear = true })
 
--- M.capabilities = require('cmp_nvim_lsp').default_capabilities()
-M.capabilities =
-  vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
+M.capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- M.capabilities =
+--   vim.tbl_deep_extend('force', vim.lsp.protocol.make_client_capabilities(), require('epo').register_cap())
 
 autocmd('LspAttach', {
   callback = function(args)
@@ -177,6 +177,20 @@ lspconfig.rust_analyzer.setup({
   },
 })
 
+lspconfig.yamlls.setup({
+  cmd = { 'yaml-language-server', '--stdio' },
+  filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'tftpl', 'tmpl' },
+
+  root_dir = function(fname)
+    return vim.fs.dirname(vim.fs.find('.git', { path = fname, upward = true })[1])
+  end,
+  single_file_support = true,
+  settings = {
+    -- https://github.com/redhat-developer/vscode-redhat-telemetry#how-to-disable-telemetry-reporting
+    redhat = { telemetry = { enabled = false } },
+  },
+})
+
 -- lspconfig.puppet.setup({
 --   cmd = { 'puppet-languagesever', '--stdio' },
 --   filetypes = { 'puppet' },
@@ -197,10 +211,11 @@ local servers = {
   'terraform_lsp',
   'ansiblels',
   'ruby_lsp',
-  'yamlls',
   'helm_ls',
   'jdtls',
   'puppet',
+  'gradle_ls',
+  -- 'yamlls',
   -- 'ast_grep',
 }
 

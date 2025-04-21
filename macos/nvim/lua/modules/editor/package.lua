@@ -47,9 +47,7 @@ packadd({
     require('Comment').setup()
 
     local ft = require('Comment.ft')
-    ft.tpl = { '#%s', '{{/*%s*/}}' }
-    ft.hcl = { '#%s', '/*%s*/' }
-    ft.tf = { '#%s', '/*%s*/' }
+    ft({ 'tftpl', 'tmpl', 'hcl', 'tf' }, '#%s')
   end,
 })
 
