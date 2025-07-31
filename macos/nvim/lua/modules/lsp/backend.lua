@@ -43,6 +43,22 @@ function M._attach(client, bufnr)
     pattern = '*',
     command = 'checktime',
   })
+
+  -- vim.lsp.handlers['textDocument/publishDiagnostics'] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+  --   virtual_text = false,
+  --   underline = true,
+  --   signs = true,
+  -- })
+  --
+  -- autocmd({ 'CursorHoldI' }, {
+  --   pattern = '*',
+  --   command = 'vim.lsp.diagnostic.show_line_diagnostics()',
+  -- })
+  --
+  -- autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
+  --   pattern = '*',
+  --   command = 'vim.lsp.buf.signature_help()',
+  -- })
 end
 
 lspconfig.pylsp.setup({
@@ -191,17 +207,17 @@ lspconfig.yamlls.setup({
   },
 })
 
--- lspconfig.puppet.setup({
---   cmd = { 'puppet-languagesever', '--stdio' },
---   filetypes = { 'puppet' },
---   root_dir = lspconfig.util.root_pattern(unpack({
---     'manifests',
---     '.puppet-lint.rc',
---     'hiera.yaml',
---     '.git',
---   })),
---   single_file_support = true,
--- })
+lspconfig.puppet.setup({
+  cmd = { 'puppet-languagesever', '--stdio' },
+  filetypes = { 'puppet' },
+  root_dir = lspconfig.util.root_pattern(unpack({
+    'manifests',
+    '.puppet-lint.rc',
+    'hiera.yaml',
+    '.git',
+  })),
+  single_file_support = true,
+})
 
 local servers = {
   'bashls',

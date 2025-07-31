@@ -43,7 +43,7 @@ packadd({
   end,
   dependencies = {
     'hrsh7th/nvim-cmp',
-    'williamboman/nvim-lsp-installer',
+    -- 'williamboman/nvim-lsp-installer',
     'williamboman/mason.nvim',
     'williamboman/mason-lspconfig.nvim',
     'neovim/nvim-lspconfig',
@@ -54,20 +54,7 @@ packadd({
   'nvimdev/lspsaga.nvim',
   event = 'LspAttach',
   dev = false,
-  config = function()
-    require('lspsaga').setup({
-      symbol_in_winbar = {
-        hide_keyword = true,
-        folder_level = 0,
-      },
-      lightbulb = {
-        sign = false,
-      },
-      outline = {
-        layout = 'float',
-      },
-    })
-  end,
+  config = conf.nvim_lspsaga,
 })
 
 -- packadd({
