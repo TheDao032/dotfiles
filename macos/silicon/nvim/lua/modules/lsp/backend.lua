@@ -1,6 +1,8 @@
 local M = {}
 -- local au = vim.api.nvim_create_autocmd
-local lspconfig = require('lspconfig')
+-- local lspconfig = require('lspconfig')
+local lspconfig = vim.lsp.config
+local util = require('lspconfig.util')
 
 -- local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
@@ -61,7 +63,7 @@ function M._attach(client, bufnr)
   -- })
 end
 
-lspconfig.pylsp.setup({
+lspconfig.pylsp = {
   on_attach = M._attach,
   capabilities = M.capabilities,
   cmd = { 'pylsp' },
@@ -88,9 +90,9 @@ lspconfig.pylsp.setup({
       },
     },
   },
-})
+}
 
-lspconfig.gopls.setup({
+lspconfig.gopls = {
   cmd = { 'gopls', 'serve' },
   on_attach = M._attach,
   capabilities = M.capabilities,
@@ -119,9 +121,9 @@ lspconfig.gopls.setup({
       },
     },
   },
-})
+}
 
-lspconfig.lua_ls.setup({
+lspconfig.lua_ls = {
   on_attach = M._attach,
   capabilities = M.capabilities,
   settings = {
@@ -151,14 +153,14 @@ lspconfig.lua_ls.setup({
       },
     },
   },
-})
+}
 
-lspconfig.clangd.setup({
+lspconfig.clangd = {
   cmd = { 'clangd', '--background-index' },
   on_attach = M._attach,
   capabilities = M.capabilities,
   root_dir = function(fname)
-    return lspconfig.util.root_pattern(unpack({
+    return util.root_pattern(unpack({
       --reorder
       'compile_commands.json',
       '.clangd',
@@ -166,11 +168,11 @@ lspconfig.clangd.setup({
       '.clang-format',
       'compile_flags.txt',
       'configure.ac', -- AutoTools
-    }))(fname) or lspconfig.util.find_git_ancestor(fname)
+    }))(fname) or util.find_git_ancestor(fname)
   end,
-})
+}
 
-lspconfig.rust_analyzer.setup({
+lspconfig.rust_analyzer = {
   on_attach = M._attach,
   capabilities = M.capabilities,
   settings = {
@@ -191,9 +193,9 @@ lspconfig.rust_analyzer.setup({
       },
     },
   },
-})
+}
 
-lspconfig.yamlls.setup({
+lspconfig.yamlls = {
   cmd = { 'yaml-language-server', '--stdio' },
   filetypes = { 'yaml', 'yaml.docker-compose', 'yaml.gitlab', 'tftpl', 'tmpl' },
 
@@ -205,19 +207,19 @@ lspconfig.yamlls.setup({
     -- https://github.com/redhat-developer/vscode-redhat-telemetry#how-to-disable-telemetry-reporting
     redhat = { telemetry = { enabled = false } },
   },
-})
+}
 
-lspconfig.puppet.setup({
+lspconfig.puppet = {
   cmd = { 'puppet-languagesever', '--stdio' },
   filetypes = { 'puppet' },
-  root_dir = lspconfig.util.root_pattern(unpack({
+  root_dir = util.root_pattern(unpack({
     'manifests',
     '.puppet-lint.rc',
     'hiera.yaml',
     '.git',
   })),
   single_file_support = true,
-})
+}
 
 local servers = {
   'bashls',
@@ -237,10 +239,10 @@ local servers = {
 }
 
 for _, server in ipairs(servers) do
-  lspconfig[server].setup({
+  lspconfig[server] = {
     on_attach = M._attach,
     capabilities = M.capabilities,
-  })
+  }
 end
 
 vim.lsp.handlers['workspace/diagnostic/refresh'] = function(_, _, ctx)

@@ -13,33 +13,20 @@ packadd({
 
 packadd({
   'nvim-treesitter/nvim-treesitter',
-  event = 'BufRead',
+  lazy = false,
   build = ':TSUpdate',
   config = conf.nvim_treesitter,
 })
 
 --@see https://github.com/nvim-treesitter/nvim-treesitter-textobjects/issues/507
-packadd({
-  'nvim-treesitter/nvim-treesitter-textobjects',
-  ft = { 'c', 'rust', 'go', 'lua' },
-  config = function()
-    vim.defer_fn(function()
-      require('nvim-treesitter.configs').setup({
-        textobjects = {
-          select = {
-            enable = true,
-            keymaps = {
-              ['af'] = '@function.outer',
-              ['if'] = '@function.inner',
-              ['ac'] = '@class.outer',
-              ['ic'] = { query = '@class.inner' },
-            },
-          },
-        },
-      })
-    end, 0)
-  end,
-})
+-- packadd({
+--   'nvim-treesitter/nvim-treesitter-textobjects',
+--   ft = { 'c', 'rust', 'go', 'lua' },
+--   dependencies = {
+--     'nvim-treesitter/nvim-treesitter',
+--   },
+--   config = conf.nvim_treesitter_textobjects,
+-- })
 
 packadd({
   'numToStr/Comment.nvim',

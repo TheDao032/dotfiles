@@ -39,7 +39,8 @@ end
 function config.nvim_treesitter()
   vim.opt.foldmethod = 'expr'
   vim.opt.foldexpr = 'nvim_treesitter#foldexpr()'
-  require('nvim-treesitter.configs').setup({
+  require('nvim-treesitter').setup({
+    install_dir = vim.fn.stdpath('data') .. '/site',
     ensure_installed = {
       'c',
       'cpp',
@@ -90,6 +91,22 @@ function config.nvim_treesitter()
     callback = function(opt)
       vim.bo[opt.buf].indentexpr = 'nvim_treesitter#indent()'
     end,
+  })
+end
+
+function config.nvim_treesitter_textobjects()
+  require('nvim-treesitter').setup({
+    textobjects = {
+      select = {
+        enable = true,
+        keymaps = {
+          ['af'] = '@function.outer',
+          ['if'] = '@function.inner',
+          ['ac'] = '@class.outer',
+          ['ic'] = '@class.inner',
+        },
+      },
+    },
   })
 end
 
