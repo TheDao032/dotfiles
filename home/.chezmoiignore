@@ -1,0 +1,17 @@
+# Files / dirs to ignore when chezmoi reads the source.
+# https://www.chezmoi.io/reference/special-files-and-directories/chezmoiignore/
+
+README.md
+docs/
+LICENSE
+
+# Skip macOS Finder cruft
+.DS_Store
+
+# Skip OS-specific files when not on that OS — chezmoi templates these out.
+{{- if ne .chezmoi.os "darwin" }}
+.Brewfile
+{{- end }}
+{{- if ne .chezmoi.os "linux" }}
+# (placeholder for linux-only files when they exist)
+{{- end }}

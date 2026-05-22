@@ -1,0 +1,10 @@
+# ~/.zprofile — rendered by chezmoi
+# Sourced once for login zsh shells. Set up PATH for non-interactive contexts.
+
+{{- if eq .chezmoi.os "darwin" }}
+{{-   if eq .chezmoi.arch "arm64" }}
+eval "$({{ .paths.homebrew_prefix_arm }}/bin/brew shellenv)"
+{{-   else }}
+eval "$({{ .paths.homebrew_prefix_intel }}/bin/brew shellenv)"
+{{-   end }}
+{{- end }}

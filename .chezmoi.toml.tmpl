@@ -1,0 +1,21 @@
+# chezmoi config template — rendered by `chezmoi init` into ~/.config/chezmoi/chezmoi.toml.
+# Edit this template to change defaults. Per-machine overrides live in the rendered file.
+
+# Where the age private key lives. chezmoi reads this on every `apply` to decrypt
+# encrypted_* files. NEVER commit this key.
+encryption = "age"
+
+[age]
+    identity  = "{{ .chezmoi.homeDir }}/.config/chezmoi/key.txt"
+    recipient = "age1yykdvcl7hu2kf4klk854atdkawhutj4dq54zpg98hc03s35hdycqmrdlz4"
+
+[diff]
+    pager = "less -R"
+
+[merge]
+    command = "nvim"
+    args    = ["-d"]
+
+# Allow per-machine overrides via prompts at chezmoi init time.
+[data]
+    # `chezmoi data` shows everything available to templates.

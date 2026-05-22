@@ -1,0 +1,60 @@
+# Brewfile — declarative install for macOS.
+# Apply with: brew bundle (chezmoi runs this automatically on apply).
+
+# ─── shell ──────────────────────────────────────────────────────────────────
+brew "zsh"
+brew "zsh-autosuggestions"
+brew "zsh-completions"
+brew "zsh-syntax-highlighting"
+
+# ─── core tooling ───────────────────────────────────────────────────────────
+brew "git"
+brew "git-delta"          # better diffs
+brew "bat"                # better cat
+brew "fzf"                # fuzzy finder
+brew "ripgrep"            # better grep
+brew "fd"                 # better find
+brew "jq"                 # JSON CLI
+brew "yq"                 # YAML CLI
+brew "tree"
+brew "htop"
+brew "tmux"
+brew "neovim"
+brew "wget"
+brew "curl"
+
+# ─── language runtimes (managers — install language versions per-project) ──
+brew "jenv"               # Java
+brew "rbenv"              # Ruby
+brew "nvm"                # Node
+brew "go"                 # Go (default install)
+brew "asdf"               # multi-language fallback
+brew "rustup"             # Rust
+
+# ─── language-specific deps for our compile paths ───────────────────────────
+brew "openssl@3"
+brew "readline"
+brew "libyaml"
+brew "openjdk"
+
+# ─── infra / devops ─────────────────────────────────────────────────────────
+brew "ansible"
+brew "packer"
+brew "qemu"               # for vagrant-qemu on Apple Silicon
+brew "kubectl"
+brew "k9s"                # k8s TUI
+brew "terraform"
+brew "colima"             # docker runtime on macOS
+brew "docker"             # client only — colima provides the daemon
+
+# ─── secrets / encryption ───────────────────────────────────────────────────
+brew "age"
+brew "gitleaks"           # scan for committed secrets
+brew "gh"                 # GitHub CLI
+
+# ─── cask: GUI apps + Vagrant ───────────────────────────────────────────────
+cask "vagrant"            # 2.4.3+ for HCP env-var auth
+
+# ─── Vagrant plugins are managed via `vagrant plugin install` (not Brewfile) ─
+# - vagrant-qemu          (consumer plugin for our boxes)
+# Install with:  vagrant plugin install vagrant-qemu

@@ -1,0 +1,12 @@
+# ~/.ssh/config — rendered by chezmoi
+# Permissions hardened automatically because of the `private_` prefix on the parent dir.
+
+# Colima local socket (managed by colima itself)
+Include ~/.colima/ssh_config
+
+# CGAesthetics mobile certs deploy key
+Host github-cgaesthetics-certs
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/cgaesthetics_mobile_certs_deploy
+    IdentitiesOnly yes

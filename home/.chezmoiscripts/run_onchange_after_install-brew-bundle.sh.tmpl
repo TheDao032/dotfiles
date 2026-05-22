@@ -1,0 +1,9 @@
+{{- if eq .chezmoi.os "darwin" }}
+#!/usr/bin/env bash
+# run_onchange_after_install-brew-bundle.sh — install Brewfile packages.
+# Hash: {{ include ".Brewfile" | sha256sum }}
+# (the hash above forces re-run whenever Brewfile changes)
+
+set -euo pipefail
+brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile" --no-lock
+{{- end }}

@@ -1,0 +1,30 @@
+# External sources chezmoi pulls + manages at apply-time.
+# https://www.chezmoi.io/reference/special-files-and-directories/chezmoiexternal-format/
+#
+# gpakosz/.tmux is a curated tmux framework. We pull it as an archive and
+# overlay it under ~/.config/tmux/ at apply time. The user-customization
+# file (tmux.conf.local) lives in this repo and IS NOT overwritten by the
+# external (gpakosz's archive doesn't include a tmux.conf.local — it ships
+# tmux.conf.local.example which we ignore).
+#
+# Refresh interval: weekly. Run `chezmoi apply --refresh-externals` to
+# force-refresh sooner.
+
+[".config/tmux"]
+    type   = "archive"
+    url    = "https://github.com/gpakosz/.tmux/archive/refs/heads/master.tar.gz"
+    stripComponents = 1
+    refreshPeriod   = "168h"
+    # exact=false means chezmoi doesn't delete other files in this dir.
+    # Critical: our own tmux.conf.local (managed by chezmoi from this repo)
+    # must NOT be touched by the external.
+    exact  = false
+    filter.exclude = [
+        "README.md",
+        "LICENSE",
+        ".gitignore",
+        ".git*",
+        "tmux.conf.local",         # gpakosz ships a template version named the same — ignore
+        "tmux.conf.local.example",
+        "screenshots*",
+    ]

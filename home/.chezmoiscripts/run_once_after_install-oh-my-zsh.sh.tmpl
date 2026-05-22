@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# run_once_after_install-oh-my-zsh.sh — bootstrap oh-my-zsh on first apply.
+# This is run_once so it only fires when this exact script content hasn't run
+# on this machine before.
+
+set -euo pipefail
+
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    echo "==> oh-my-zsh already installed at ~/.oh-my-zsh"
+    exit 0
+fi
+
+echo "==> Installing oh-my-zsh (unattended)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
+
+echo "==> oh-my-zsh installed"

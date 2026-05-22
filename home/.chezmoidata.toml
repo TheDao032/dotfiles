@@ -1,0 +1,27 @@
+# Global data values available to all templates as `.X` via Go template syntax.
+# Override per-machine via the chezmoi config file (~/.config/chezmoi/chezmoi.toml).
+# https://www.chezmoi.io/reference/special-files-and-directories/chezmoidata/
+
+[user]
+    name  = "Nguyen The Dao"
+    email = "nthedao2705@gmail.com"
+    github = "TheDao032"
+    gitlab = "nguyenmto"
+
+[machine]
+    # Default role; override in chezmoi.toml per-host if needed.
+    # Used by templates to gate machine-specific config.
+    role = "personal"
+
+[tools]
+    # Default editor; flips to nvim on workstations with nvim installed.
+    editor = "nvim"
+    # Default shell prompt theme name (for oh-my-zsh).
+    omz_theme = "robbyrussell"
+    # List of oh-my-zsh plugins to enable.
+    omz_plugins = ["git", "poetry", "kubectl", "docker"]
+
+[paths]
+    # Common path roots referenced by templates.
+    homebrew_prefix_arm    = "/opt/homebrew"
+    homebrew_prefix_intel  = "/usr/local"

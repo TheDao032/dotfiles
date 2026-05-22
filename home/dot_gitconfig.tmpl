@@ -1,0 +1,41 @@
+[user]
+    name  = {{ .user.name }}
+    email = {{ .user.email }}
+
+[init]
+    defaultBranch = main
+
+[pull]
+    rebase = false
+
+[fetch]
+    prune = true
+
+# Rewrite https → ssh for orgs we contribute to.
+[url "git@github.com:{{ .user.github }}/"]
+    insteadOf = https://github.com/{{ .user.github }}/
+
+[url "git@github.com:TMMFZ/"]
+    insteadOf = https://github.com/TMMFZ/
+
+[credential]
+    helper = osxkeychain
+
+[core]
+    excludesfile = ~/.gitignore
+    editor = {{ .tools.editor }}
+
+# Nicer diffs (delta if installed, else plain)
+[diff]
+    colorMoved = default
+{{- if lookPath "delta" }}
+[core]
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
+[delta]
+    navigate = true
+    light = false
+[merge]
+    conflictstyle = zdiff3
+{{- end }}
