@@ -93,7 +93,10 @@ source ~/.zshrc                  # new env var in current shell
 Operational docs:
 - [docs/ONBOARDING.md](docs/ONBOARDING.md) — bootstrap a new machine end-to-end
 - [docs/ADDING-A-SECRET.md](docs/ADDING-A-SECRET.md) — encrypt / rotate a secret
-- [docs/MIGRATION-LOG.md](docs/MIGRATION-LOG.md) — what changed from the pre-2026-05-22 layout, why
+
+Project history:
+- [docs/CLOSEOUT-SUMMARY.md](docs/CLOSEOUT-SUMMARY.md) — 3-min exec summary of the 2026-05 restructure
+- [docs/MIGRATION-LOG.md](docs/MIGRATION-LOG.md) — full restructure history + secret-rotation table
 
 ## Naming conventions (chezmoi)
 
