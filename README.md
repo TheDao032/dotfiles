@@ -86,9 +86,14 @@ source ~/.zshrc                  # new env var in current shell
 ```
 
 ## Documentation
-- [docs/ONBOARDING.md](docs/ONBOARDING.md) — bootstrap a new machine
-- [docs/ADDING-A-SECRET.md](docs/ADDING-A-SECRET.md) — encrypt a new env var
-- [docs/MIGRATION-LOG.md](docs/MIGRATION-LOG.md) — restructure history
+
+**👉 Start here if you've never used chezmoi**:
+- [**docs/CHEZMOI-CONCEPTS.md**](docs/CHEZMOI-CONCEPTS.md) — concept-first guide; read once and you'll understand every file in this repo
+
+Operational docs:
+- [docs/ONBOARDING.md](docs/ONBOARDING.md) — bootstrap a new machine end-to-end
+- [docs/ADDING-A-SECRET.md](docs/ADDING-A-SECRET.md) — encrypt / rotate a secret
+- [docs/MIGRATION-LOG.md](docs/MIGRATION-LOG.md) — what changed from the pre-2026-05-22 layout, why
 
 ## Naming conventions (chezmoi)
 
