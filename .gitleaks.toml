@@ -1,0 +1,24 @@
+# gitleaks config — extends the default ruleset with allowlists for false positives.
+# https://github.com/gitleaks/gitleaks#configuration
+
+# Inherit the built-in rules.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowlists for false positives in this repo"
+
+regexes = [
+    # age public keys (recipient keys) — designed to be public, like id_rsa.pub.
+    # Format: 'age1<58-char-bech32>'. Used in docs/ONBOARDING.md to identify the
+    # public recipient of this repo. The PRIVATE key (AGE-SECRET-KEY-...) is
+    # never committed and stays in ~/.config/chezmoi/key.txt.
+    '''age1[02-9ac-hj-np-z]{58}''',
+]
+
+paths = [
+    # Encrypted files are opaque ciphertext to gitleaks — false positives can
+    # happen if random bytes look like a token. This file IS encrypted with age;
+    # the encryption itself is the protection.
+    '''home/encrypted_.*''',
+]
