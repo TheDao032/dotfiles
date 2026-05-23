@@ -1,9 +1,17 @@
-{{- if eq .chezmoi.os "darwin" }}
 #!/usr/bin/env bash
-# run_onchange_after_install-brew-bundle.sh — install Brewfile packages.
-# Hash: {{ include ".Brewfile" | sha256sum }}
-# (the hash above forces re-run whenever Brewfile changes)
+# run_onchange_after_install-brew-bundle.sh — install Brewfile packages (macOS only).
+# Re-runs whenever the Brewfile hash changes.
+#
+# Brewfile hash (re-runs script when this changes): {{ include "dot_Brewfile" | sha256sum }}
 
 set -euo pipefail
-brew bundle --file="{{ .chezmoi.homeDir }}/.Brewfile" --no-lock
-{{- end }}
+[[ "$(uname -s)" != "Darwin" ]] && exit 0
+
+if ! command -v brew >/dev/null 2>&1; then
+    echo "==> brew not found — install-brew script must run first"; exit 1
+fi
+
+# --no-upgrade: don't auto-upgrade outdated formulae; user does that manually
+#               via `brew upgrade` when convenient. Otherwise every chezmoi
+#               apply could trigger long upgrade chains.
+brew bundle install --file="{{ .chezmoi.homeDir }}/.Brewfile" --no-upgrade

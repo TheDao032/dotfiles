@@ -1,60 +1,131 @@
 # Brewfile — declarative install for macOS.
-# Apply with: brew bundle (chezmoi runs this automatically on apply).
+# Apply with: brew bundle (chezmoi runs this automatically on apply via
+# .chezmoiscripts/run_onchange_after_install-brew-bundle.sh.tmpl).
+#
+# Auto-generated from `brew leaves` + `brew list --cask` on 2026-05-23.
+# Curated to reflect the actual installed state of this machine + a few
+# additions marked OPTIONAL that I'd recommend.
+#
+# To remove an entry: edit this file with `chezmoi edit ~/.Brewfile`,
+# then `chezmoi apply`. To uninstall the brew itself: `brew uninstall <name>`
+# AFTER removing from this file (otherwise next apply re-installs it).
 
-# ─── shell ──────────────────────────────────────────────────────────────────
-brew "zsh"
-brew "zsh-autosuggestions"
-brew "zsh-completions"
-brew "zsh-syntax-highlighting"
+# ─── Custom taps ────────────────────────────────────────────────────────────
+tap "hashicorp/tap"
+tap "slp/krunkit"
 
-# ─── core tooling ───────────────────────────────────────────────────────────
-brew "git"
-brew "git-delta"          # better diffs
-brew "bat"                # better cat
-brew "fzf"                # fuzzy finder
-brew "ripgrep"            # better grep
-brew "fd"                 # better find
-brew "jq"                 # JSON CLI
-brew "yq"                 # YAML CLI
-brew "tree"
-brew "htop"
-brew "tmux"
-brew "neovim"
-brew "wget"
-brew "curl"
+# ─── shell + completion ─────────────────────────────────────────────────────
+brew "zsh-autosuggestions"          # auto-suggest history matches
+# brew "zsh-syntax-highlighting"    # OPTIONAL — syntax-color commands as you type
+# brew "zsh-completions"            # OPTIONAL — extra completion definitions
 
-# ─── language runtimes (managers — install language versions per-project) ──
-brew "jenv"               # Java
-brew "rbenv"              # Ruby
-brew "nvm"                # Node
-brew "go"                 # Go (default install)
-brew "asdf"               # multi-language fallback
-brew "rustup"             # Rust
+# ─── secrets / encryption ───────────────────────────────────────────────────
+brew "age"                          # modern file encryption (chezmoi secrets)
+brew "chezmoi"                      # this dotfiles manager
+brew "gitleaks"                     # scan repos for committed secrets
 
-# ─── language-specific deps for our compile paths ───────────────────────────
-brew "openssl@3"
-brew "readline"
-brew "libyaml"
-brew "openjdk"
+# ─── core CLI tools ─────────────────────────────────────────────────────────
+brew "bat"                          # better cat
+brew "btop"                         # better top/htop
+brew "fzf"                          # fuzzy finder
+brew "neovim"                       # editor
+brew "tmux"                         # terminal multiplexer
+brew "tree-sitter-cli"              # syntax parser (used by neovim treesitter)
+brew "watch"                        # repeat command + show output
+brew "wget"                         # http downloader
+
+# ─── git ────────────────────────────────────────────────────────────────────
+brew "gh"                           # GitHub CLI
+brew "lazygit"                      # tui git
+# brew "git-delta"                  # OPTIONAL — better diffs in git
+
+# ─── developer / language runtimes ──────────────────────────────────────────
+# Version managers (NOT the runtimes themselves — install per-project)
+brew "jenv"                         # Java version manager
+brew "nvm"                          # Node version manager
+brew "rbenv"                        # Ruby version manager
+brew "rustup"                       # Rust toolchain installer
+
+# Language-specific deps for compile flags (referenced in dot_zshrc.tmpl)
+brew "openjdk"                      # default Java
+brew "openjdk@17"                   # pinned Java 17 (specific projects need it)
+brew "go"                           # Go language
+
+# Python (system Python + tk for some GUI libs)
+brew "python-tk@3.14"
 
 # ─── infra / devops ─────────────────────────────────────────────────────────
 brew "ansible"
-brew "packer"
-brew "qemu"               # for vagrant-qemu on Apple Silicon
-brew "kubectl"
-brew "k9s"                # k8s TUI
-brew "terraform"
-brew "colima"             # docker runtime on macOS
-brew "docker"             # client only — colima provides the daemon
+brew "hashicorp/tap/packer"
+brew "hashicorp/tap/terraform"
+brew "terragrunt"                   # terraform wrapper
+brew "awscli"
+brew "azure-cli"
+brew "argocd"                       # GitOps for k8s
+brew "helm"                         # k8s package manager
+brew "kubernetes-cli"               # kubectl
+brew "k9s"                          # k8s tui
 
-# ─── secrets / encryption ───────────────────────────────────────────────────
-brew "age"
-brew "gitleaks"           # scan for committed secrets
-brew "gh"                 # GitHub CLI
+# ─── container / VM ─────────────────────────────────────────────────────────
+brew "docker"                       # docker client (daemon via colima)
+brew "docker-buildx"                # multi-arch builds
+brew "docker-compose"               # multi-container orchestration
+brew "colima"                       # docker daemon on macOS
+brew "qemu"                         # VM emulator (vagrant-qemu plugin uses this)
+brew "slp/krunkit/krunkit"          # libkrun-based hypervisor (vagrant accelerator)
 
-# ─── cask: GUI apps + Vagrant ───────────────────────────────────────────────
-cask "vagrant"            # 2.4.3+ for HCP env-var auth
+# ─── AI / LLM ───────────────────────────────────────────────────────────────
+brew "ollama"                       # local LLM runtime
 
-# ─── Vagrant plugins are managed via `vagrant plugin install` (not Brewfile) ─
-# - vagrant-qemu          (consumer plugin for our boxes)
-# Install with:  vagrant plugin install vagrant-qemu
+# ─── misc utilities ─────────────────────────────────────────────────────────
+brew "hunspell"                     # spell checker (used by various editors)
+brew "mermaid-cli"                  # diagram renderer
+brew "pam-reattach"                 # PAM module for tmux + touch ID
+brew "protobuf"                     # protocol buffers compiler
+brew "reattach-to-user-namespace"   # tmux + macOS clipboard fix
+
+# ─── GUI applications (casks) ───────────────────────────────────────────────
+
+# IDE / editors / terminals
+cask "cursor"                       # AI-augmented VS Code fork
+cask "kitty@nightly"                # GPU-accelerated terminal
+
+# AI tools
+cask "claude"                       # Anthropic Claude desktop
+cask "claude-code"                  # Anthropic CLI agent
+cask "codex"                        # codex AI
+
+# Mobile / cross-platform dev
+cask "android-commandlinetools"
+cask "flutter"
+
+# Browsers
+cask "google-chrome"
+cask "firefox"
+
+# Communication
+cask "slack"
+cask "microsoft-teams"
+cask "discord"
+
+# Productivity
+cask "obsidian"                     # knowledge base
+cask "figma"
+cask "spotify"
+
+# VM / virtualization
+cask "vagrant"                      # VM orchestrator
+cask "virtualbox"                   # VM hypervisor
+cask "utm"                          # macOS-native QEMU GUI
+
+# Security / network
+cask "bitwarden"                    # password manager (UI)
+cask "cloudflare-warp"              # VPN
+cask "ngrok"                        # tunneling
+
+# Misc
+cask "parsec"                       # remote desktop
+cask "pdk"                          # Puppet Development Kit
+
+# ─── Vagrant plugins (NOT in Brewfile — managed via vagrant plugin install) ──
+# - vagrant-qemu (installed by run_once_after_install-vagrant-qemu-plugin.sh)
