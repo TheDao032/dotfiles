@@ -177,9 +177,21 @@ export DOCKER_VOL_HOME_DEVICE="$OZMO_REPO_DIR/ozmo_home_dir"
 # chezmoi from an age-encrypted source. To edit:
 #   chezmoi edit ~/.envrc.private
 # (chezmoi decrypts on edit, re-encrypts on save.)
-[ -f "$HOME/.envrc.private" ] && source "$HOME/.envrc.private"
+# Use if/then/fi (not `[ -f X ] && source X`) so the missing-file case returns
+# 0 instead of leaking exit 1 to the prompt — robbyrussell shows a red arrow
+# when $? != 0, which makes the prompt look "errored" just from a missing
+# optional file.
+if [ -f "$HOME/.envrc.private" ]; then
+    source "$HOME/.envrc.private"
+fi
 
 # ─── machine-local overrides (NOT in git) ───────────────────────────────────
 # Anything ~/.zshrc.local will be sourced last. Use for one-off machine tweaks
 # you don't want to template (e.g., experimental aliases). NEVER put secrets here.
-[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
+if [ -f "$HOME/.zshrc.local" ]; then
+    source "$HOME/.zshrc.local"
+fi
+
+# Belt-and-braces: ensure rc-load exit code is 0 so the prompt indicator
+# reflects YOUR commands, not "the last conditional in zshrc failed".
+true
