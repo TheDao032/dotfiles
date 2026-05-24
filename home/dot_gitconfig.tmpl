@@ -21,6 +21,19 @@
 [credential]
     helper = osxkeychain
 
+{{- /* gh CLI credential helper for github.com — if installed, use it for HTTPS
+       so `git push https://github.com/...` auto-uses the PAT stored by
+       `gh auth login`. Without this block, gh-managed credentials are
+       invisible to git. */}}
+{{- if lookPath "gh" }}
+[credential "https://github.com"]
+    helper =
+    helper = !{{ lookPath "gh" }} auth git-credential
+[credential "https://gist.github.com"]
+    helper =
+    helper = !{{ lookPath "gh" }} auth git-credential
+{{- end }}
+
 [core]
     excludesfile = ~/.gitignore
     editor = {{ .tools.editor }}

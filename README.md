@@ -68,7 +68,7 @@ source ~/.zshrc                  # new env var in current shell
 │   ├── dot_Brewfile                    → ~/.Brewfile
 │   ├── private_dot_ssh/
 │   │   └── config.tmpl                 → ~/.ssh/config (chmod 700 parent)
-│   ├── encrypted_private_dot_envrc.age → ~/.envrc.private (age-decrypted)
+│   ├── encrypted_private_dot_envrc.private → ~/.envrc.private (age-decrypted)
 │   ├── dot_config/
 │   │   └── tmux/
 │   │       └── tmux.conf.local         → ~/.config/tmux/tmux.conf.local

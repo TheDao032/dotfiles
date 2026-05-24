@@ -1,8 +1,20 @@
 # Adding (or rotating) a secret
 
-All secrets live in `home/encrypted_private_dot_envrc.age`. When applied, this
+All secrets live in `home/encrypted_private_dot_envrc.private`. When applied, this
 decrypts to `~/.envrc.private`, which `~/.zshrc` sources on every interactive
 shell.
+
+> 📛 **Why the filename has `.private` instead of `.age`**: chezmoi parses
+> the suffix as part of the target filename, not as a marker. If we named
+> the source `encrypted_private_dot_envrc.age`, chezmoi would render it
+> to `~/.envrc.age` (which our `~/.zshrc` doesn't source). The `encrypted_`
+> PREFIX (combined with `encryption = "age"` in `~/.config/chezmoi/chezmoi.toml`)
+> is what tells chezmoi to age-decrypt the content. The `.private` SUFFIX
+> is just part of the target filename — we want the target to be
+> `~/.envrc.private` so the shell sources it correctly.
+>
+> Rule of thumb: don't add `.age` to chezmoi source names. The `encrypted_`
+> prefix is the encryption marker.
 
 ## Quick workflow
 
@@ -15,19 +27,19 @@ chezmoi edit ~/.envrc.private
 chezmoi apply                    # re-renders ~/.envrc.private
 source ~/.zshrc                  # new var live in current shell
 
-chezmoi git -- add home/encrypted_private_dot_envrc.age
+chezmoi git -- add home/encrypted_private_dot_envrc.private
 chezmoi git -- commit -m "chore(secrets): rotate MY_TOKEN"
 chezmoi git -- push
 ```
 
 ## How `chezmoi edit` works for encrypted files
 
-1. chezmoi reads the source file `home/encrypted_private_dot_envrc.age`
+1. chezmoi reads the source file `home/encrypted_private_dot_envrc.private`
 2. Uses your age private key (`~/.config/chezmoi/key.txt`) to decrypt to a temp file
 3. Opens the temp file in `$EDITOR`
 4. When you save + exit, chezmoi re-encrypts the file using the **public recipient**
    from `~/.config/chezmoi/chezmoi.toml` (`age.recipient`)
-5. Writes back to `home/encrypted_private_dot_envrc.age`
+5. Writes back to `home/encrypted_private_dot_envrc.private`
 6. Securely deletes the temp file
 
 The plaintext **never touches disk in cleartext form** (chezmoi uses a tmpfs / shred-on-close pattern).
@@ -46,7 +58,7 @@ If a secret leaked (e.g., committed to git history):
 4. **Apply + commit**:
    ```bash
    chezmoi apply
-   chezmoi git -- add home/encrypted_private_dot_envrc.age
+   chezmoi git -- add home/encrypted_private_dot_envrc.private
    chezmoi git -- commit -m "chore(secrets): rotate <name> (was leaked in <where>)"
    chezmoi git -- push
    ```

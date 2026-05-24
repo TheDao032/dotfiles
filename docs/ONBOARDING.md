@@ -62,7 +62,7 @@ This does, in order:
 3. Runs `run_onchange_before_install-brew.sh.tmpl` → installs Homebrew if missing
 4. Renders + writes all files under `home/` to `$HOME`:
    - `~/.zshrc`, `~/.zprofile`, `~/.gitconfig`, `~/.ssh/config`, etc.
-   - Decrypts `encrypted_private_dot_envrc.age` → `~/.envrc.private`
+   - Decrypts `encrypted_private_dot_envrc.private` → `~/.envrc.private`
 5. Runs `run_onchange_after_install-brew-bundle.sh.tmpl` → `brew bundle ~/.Brewfile`
 6. Runs `run_once_after_install-oh-my-zsh.sh.tmpl` → installs oh-my-zsh
 7. Runs `run_once_after_install-vagrant-qemu-plugin.sh.tmpl` → installs vagrant-qemu
