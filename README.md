@@ -93,6 +93,7 @@ source ~/.zshrc                  # new env var in current shell
 Operational docs:
 - [docs/ONBOARDING.md](docs/ONBOARDING.md) — bootstrap a new machine end-to-end
 - [docs/ADDING-A-SECRET.md](docs/ADDING-A-SECRET.md) — encrypt / rotate a secret
+- [docs/SECURITY.md](docs/SECURITY.md) — threat model, what protects what, incident response
 
 Project history:
 - [docs/CLOSEOUT-SUMMARY.md](docs/CLOSEOUT-SUMMARY.md) — 3-min exec summary of the 2026-05 restructure
