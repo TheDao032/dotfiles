@@ -24,6 +24,8 @@ running `chezmoi apply`** for the first time.
 10. [How chezmoi solved our specific problems](#10-how-chezmoi-solved-our-specific-problems)
 11. [Mental shortcuts to memorize](#11-mental-shortcuts-to-memorize)
 12. [Further reading](#12-further-reading)
+13. [How chezmoi reads, parses, and renders (the algorithm)](#13-how-chezmoi-reads-parses-and-renders-the-algorithm)
+14. [How to inspect what chezmoi will do](#14-how-to-inspect-what-chezmoi-will-do)
 
 ---
 
@@ -101,6 +103,13 @@ This is the cleverest part of chezmoi. Filenames in the source dir encode transf
 | `home/symlink_dot_vimrc` | `~/.vimrc` (a symlink) | `symlink_` → create a symlink |
 
 **Stacking is allowed**: `encrypted_private_dot_envrc.private.tmpl` would be → encrypt → set private → dot → render as template. (Read prefixes left-to-right.)
+
+> For the **full parsing order** (all prefixes, all suffixes, the algorithm
+> chezmoi runs on every filename), see [§13 — How chezmoi reads, parses,
+> and renders](#13-how-chezmoi-reads-parses-and-renders-the-algorithm).
+> The short version of the long answer: **chezmoi uses convention, not
+> configuration** — there is no separate "mapping file" that says "this
+> source → that destination." The filename IS the configuration.
 
 In **our** setup, these files demonstrate each prefix:
 
@@ -497,5 +506,327 @@ chezmoi unmanaged                  # files in $HOME that chezmoi DOESN'T know ab
 
 ---
 
-**Last revised**: 2026-05-23 (initial — written before Phase 3 cutover so the
-reader can understand chezmoi before any live config is touched).
+## 13. How chezmoi reads, parses, and renders (the algorithm)
+
+A common question after using chezmoi for a while: **"where is the file
+that says 'this template renders to that destination'?"**
+
+There ISN'T one. chezmoi uses **convention over configuration** — the file
+name itself encodes all the transformation rules. The mapping IS the
+filename. This section walks through the algorithm chezmoi runs on every
+source file.
+
+### The high-level algorithm (4 steps)
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│ Step 1 — DISCOVERY                                                │
+│ chezmoi walks the source directory (default ~/.local/share/       │
+│ chezmoi, or wherever `.chezmoiroot` redirects to). Every file/    │
+│ dir is a candidate for the source state.                          │
+└────────────────────────┬─────────────────────────────────────────┘
+                         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│ Step 2 — NAME PARSING                                             │
+│ For each file/dir name, chezmoi peels off prefixes/suffixes       │
+│ in a fixed order. Each prefix/suffix is an "attribute". The       │
+│ remainder becomes the TARGET PATH relative to $HOME.              │
+└────────────────────────┬─────────────────────────────────────────┘
+                         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│ Step 3 — CONTENT PROCESSING                                       │
+│ Read the file's contents. If marked encrypted → decrypt with age. │
+│ If marked template → render through Go templates with .chezmoi.*  │
+│ and .chezmoidata.toml as the data context.                        │
+└────────────────────────┬─────────────────────────────────────────┘
+                         ▼
+┌──────────────────────────────────────────────────────────────────┐
+│ Step 4 — WRITE                                                    │
+│ Write the processed content to the target path with the file     │
+│ mode determined by the attributes (chmod 600 if private,         │
+│ +x if executable, etc.). chmod the parent dir if needed.         │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### The full attribute parsing rules
+
+This is the **complete grammar** chezmoi applies to every filename.
+Source-of-truth: `internal/chezmoi/sourcestate.go` in the chezmoi repo,
+function `parseSourceName`.
+
+#### For files
+
+| Order | Prefix/Suffix | Strips it? | Effect |
+|---|---|---|---|
+| 1 | `encrypted_` | strip | Mark for age/gpg decryption |
+| 2 | `once_` | strip | (only valid on `run_*` scripts) |
+| 3 | `private_` | strip | chmod 600 |
+| 4 | `readonly_` | strip | chmod 400 |
+| 5 | `empty_` | strip | Allow empty file (otherwise chezmoi treats empty as "absent") |
+| 6 | `executable_` | strip | chmod 700 / +x |
+| 7 | `symlink_` | strip | Create as symlink (file contents = link target) |
+| 8 | `modify_` | strip | Treat as a modifier script (runs against existing target) |
+| 9 | `create_` | strip | Only create if target doesn't exist (don't overwrite) |
+| 10 | `dot_` | strip + replace with `.` | Source `dot_zshrc` → target `.zshrc` |
+| 11 | `literal_` | strip | Treats next prefix as literal (escape hatch) |
+| 12 | `.tmpl` (suffix) | strip | Process through Go templates |
+| 13 | `.literal` (suffix) | strip | Escape hatch for filenames containing reserved suffixes |
+
+#### For scripts (files in `.chezmoiscripts/` or named `run_*`)
+
+| Prefix | Meaning |
+|---|---|
+| `run_` | This is a script — execute, don't deploy |
+| `run_once_` | Run once per machine (chezmoi tracks via content hash) |
+| `run_onchange_` | Re-run whenever script content changes |
+| `run_*_before_` | Run BEFORE files are applied |
+| `run_*_after_` | Run AFTER files are applied (default) |
+
+#### Reserved directory / file names
+
+| Name | What it does |
+|---|---|
+| `.chezmoiroot` | Redirect: source root is whatever directory this file's content names |
+| `.chezmoiignore` | Glob patterns of files NOT to deploy |
+| `.chezmoidata.<format>` | Template data (TOML / YAML / JSON) |
+| `.chezmoitemplates/` | Reusable template partials (callable via `{{ template "name" . }}`) |
+| `.chezmoiexternal.<format>` | External sources (URLs, archives, git repos) |
+| `.chezmoiscripts/` | Scripts directory (alternative to `run_*` files at root) |
+| `.chezmoiremove` | Files to actively delete from target |
+
+### Concrete examples from THIS repo
+
+Trace each of our files through the algorithm:
+
+#### Example 1 — templated dotfile
+
+```
+SOURCE: home/dot_zshrc.tmpl
+
+Step 2 (parse):
+    "dot_zshrc.tmpl"
+    ↓ strip dot_  → ".zshrc.tmpl"
+    ↓ strip .tmpl → ".zshrc"           + TEMPLATE=true
+    target: $HOME/.zshrc                 mode=644 (default)
+
+Step 3 (content): read source → render Go template with data context
+        (.chezmoi.os="darwin", .chezmoi.arch="arm64",
+         .user.name="Nguyen The Dao", .tools.editor="nvim", ...)
+
+Step 4 (write): write rendered output to ~/.zshrc mode 644
+```
+
+#### Example 2 — encrypted + private secrets file
+
+```
+SOURCE: home/encrypted_private_dot_envrc.private
+
+Step 2 (parse):
+    "encrypted_private_dot_envrc.private"
+    ↓ strip encrypted_ → "private_dot_envrc.private"  + ENCRYPTED=true
+    ↓ strip private_   → "dot_envrc.private"           + MODE=600
+    ↓ strip dot_       → ".envrc.private"
+    (.private is NOT a recognized suffix → kept verbatim)
+    target: $HOME/.envrc.private                       mode=600
+
+Step 3 (content): read source → pipe through `age -d -i ~/.config/chezmoi/key.txt`
+
+Step 4 (write): write decrypted content to ~/.envrc.private mode 600
+```
+
+#### Example 3 — directory with attributes
+
+```
+SOURCE: home/private_dot_ssh/config.tmpl
+
+Step 2a (parse parent dir "private_dot_ssh"):
+    ↓ strip private_ → "dot_ssh"     + DIR_MODE=700
+    ↓ strip dot_     → ".ssh"
+    directory target: ~/.ssh                           mode=700
+
+Step 2b (parse file "config.tmpl"):
+    ↓ strip .tmpl    → "config"      + TEMPLATE=true
+    file target: ~/.ssh/config                         mode=644
+
+Step 3+4: render template content, write to ~/.ssh/config,
+          chmod parent dir to 700
+```
+
+#### Example 4 — script (not deployed; executed)
+
+```
+SOURCE: home/.chezmoiscripts/run_onchange_before_install-brew.sh.tmpl
+
+Step 2 (parse — but this is a SCRIPT, so different rules):
+    "run_onchange_before_install-brew.sh.tmpl"
+    ↓ strip run_         → "onchange_before_install-brew.sh.tmpl"
+    ↓ strip onchange_    → re-run when content hash changes
+    ↓ strip before_      → run BEFORE applying files
+    ↓ strip .tmpl        → "install-brew.sh"           + TEMPLATE=true
+    NOT deployed to a target path.
+    Stored in chezmoi state as a script.
+
+Step 3 (content): read source → render template → result is bash script content
+
+Step 4 (execute):
+    1. Write rendered script to a temp file with +x
+    2. Execute it (`bash /tmp/random-X.sh`)
+    3. Capture exit code (non-zero = abort apply)
+    4. Record content hash in ~/.config/chezmoi/chezmoistate.boltdb
+       so chezmoi knows whether to re-run next time
+```
+
+### The "rules file" you might be looking for
+
+There IS no separate rules file in your repo or chezmoi's config. The
+rules live in **chezmoi's Go source code**:
+
+| What | Where in chezmoi source |
+|---|---|
+| Prefix/suffix list + parsing order | [`internal/chezmoi/sourcestate.go`](https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/sourcestate.go) — search for `parseSourceName` |
+| Attribute meanings (file) | [`internal/chezmoi/sourcefiletype.go`](https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/sourcefiletype.go) |
+| Script lifecycle (run_once, etc.) | [`internal/chezmoi/scriptattr.go`](https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/scriptattr.go) |
+| Template rendering pipeline | [`internal/chezmoi/templateexecutor.go`](https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/templateexecutor.go) |
+| External-source handling | [`internal/chezmoi/sourcestate.go`](https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/sourcestate.go) — `External` struct (look for `type External struct`) |
+
+**Official docs** for the same content:
+- Source state attributes (the prefix table): https://www.chezmoi.io/reference/source-state-attributes/
+- Special files / directories: https://www.chezmoi.io/reference/special-files-and-directories/
+
+> **The conventions ARE the API.** That's it. There's no hidden mapping file.
+
+---
+
+## 14. How to inspect what chezmoi will do
+
+If you ever want to trace the parsing yourself (debugging, sanity-checking,
+or just exploring), these commands let you see exactly what chezmoi computed:
+
+### 14.1 List every source file + its resolved target
+
+```bash
+chezmoi managed
+```
+
+Outputs one target path per line (relative to $HOME). This is the
+post-parse view — everything chezmoi WILL deploy.
+
+For our repo it prints things like:
+```
+.Brewfile
+.chezmoiscripts/install-brew-bundle.sh
+.config/tmux/.tmux.conf
+.config/tmux/tmux.conf.local
+.envrc.private
+.gitconfig
+.gitignore
+.ssh/config
+.zprofile
+.zshrc
+```
+
+Notice `.envrc.private` (not `encrypted_private_dot_envrc.private`) —
+that's the resolved target after all prefixes are stripped.
+
+### 14.2 Resolve a single source file's target
+
+```bash
+chezmoi target-path home/encrypted_private_dot_envrc.private
+# → /Users/thedao/.envrc.private
+```
+
+Useful for spot-checking when you add a new file and want to confirm
+chezmoi parsed the name as expected.
+
+### 14.3 Reverse — find the source for a destination file
+
+```bash
+chezmoi source-path ~/.zshrc
+# → /Users/thedao/.config/dotfiles/home/dot_zshrc.tmpl
+```
+
+Useful when you `cat ~/.zshrc` and want to know where it came from.
+
+### 14.4 See ALL the template data available
+
+```bash
+chezmoi data
+```
+
+Dumps the full data context — every variable your templates can read.
+Includes `.chezmoi.*` built-ins (os, arch, hostname, etc.) plus everything
+from your `.chezmoidata.toml`.
+
+Useful for: writing new templates, debugging "why isn't `{{ .X }}` working?"
+
+### 14.5 Render a template WITHOUT writing it
+
+```bash
+chezmoi execute-template < home/dot_zshrc.tmpl | less
+```
+
+Shows you exactly what the rendered output would look like, without
+touching the destination.
+
+Or render an arbitrary string from stdin:
+```bash
+echo '{{ .chezmoi.arch }} {{ .user.name }}' | chezmoi execute-template
+# → arm64 Nguyen The Dao
+```
+
+### 14.6 See what content chezmoi has for a target (post-everything)
+
+```bash
+chezmoi cat ~/.zshrc       # full rendered content (templates + decryption + etc.)
+chezmoi cat ~/.envrc.private | head -10
+```
+
+This is the most powerful "what would actually land on disk?" command.
+Use it before `chezmoi apply` to preview the bytes that would be written.
+
+### 14.7 Diff against current $HOME state
+
+```bash
+chezmoi diff               # what would change in $HOME?
+chezmoi status             # one-line per pending change
+chezmoi apply --dry-run --verbose | head -50    # walk through every action
+```
+
+### 14.8 Trace + log every action chezmoi takes
+
+```bash
+chezmoi apply --verbose 2>&1 | less
+```
+
+Shows every file read, every template render, every script execution,
+in order. Good when something mysteriously isn't happening.
+
+### 14.9 Visualize the source ↔ target mapping all at once
+
+```bash
+chezmoi managed | while read t; do
+    src=$(chezmoi source-path "$HOME/$t" 2>/dev/null || echo '(?)')
+    printf '%-50s ← %s\n' "$HOME/$t" "$src"
+done
+```
+
+Prints a `target ← source` table so you see the entire mapping concretely.
+
+### Common "wait, why didn't that work?" gotchas
+
+| Symptom | Likely cause |
+|---|---|
+| File didn't render as template | Forgot `.tmpl` suffix |
+| File didn't end up at `~/.X` | Forgot `dot_` prefix |
+| Permissions are 644 instead of 600 | Forgot `private_` prefix |
+| `chezmoi managed` doesn't list my file | Matched a pattern in `.chezmoiignore` |
+| `home/foo.tmpl` rendered as `foo.tmpl` not `foo` | `.tmpl` IS stripped. Check `chezmoi target-path home/foo.tmpl` |
+| Script ran every apply | Used bare `run_` not `run_once_` or `run_onchange_` |
+| Encrypted file says "encryption not configured" | `chezmoi.toml` doesn't have `encryption = "age"` set |
+| Empty file vanished from target | Forgot `empty_` prefix (chezmoi treats empty as "absent" by default) |
+
+---
+
+**Last revised**: 2026-05-24 (added §13 + §14 covering the parsing
+algorithm + inspection commands. Original concept doc written 2026-05-23
+before Phase 3 cutover.)
