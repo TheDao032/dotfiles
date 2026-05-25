@@ -5,8 +5,43 @@
 
 set -euo pipefail
 
+# Already installed? No-op.
 if [ -d "$HOME/.oh-my-zsh" ]; then
     echo "==> oh-my-zsh already installed at ~/.oh-my-zsh"
+    exit 0
+fi
+
+# oh-my-zsh requires zsh + git to install. macOS ships both; Linux distros
+# don't always. Skip gracefully if either is missing — DON'T auto-install
+# (would need sudo, which chezmoi scripts shouldn't require). Tell the user
+# how to install for their OS, then re-run `chezmoi apply --force`.
+missing=()
+command -v zsh >/dev/null 2>&1 || missing+=("zsh")
+command -v git >/dev/null 2>&1 || missing+=("git")
+
+if [ "${#missing[@]}" -gt 0 ]; then
+    echo "==> oh-my-zsh setup skipped — missing: ${missing[*]}"
+    case "$(uname -s)" in
+        Darwin)
+            echo "    Install with:   brew install ${missing[*]}"
+            ;;
+        Linux)
+            if   command -v apt-get >/dev/null 2>&1; then
+                echo "    Install with:   sudo apt-get install -y ${missing[*]}"
+            elif command -v dnf     >/dev/null 2>&1; then
+                echo "    Install with:   sudo dnf install -y ${missing[*]}"
+            elif command -v pacman  >/dev/null 2>&1; then
+                echo "    Install with:   sudo pacman -S --noconfirm ${missing[*]}"
+            else
+                echo "    Install via your distro's package manager."
+            fi
+            echo
+            echo "    Then re-run:    chezmoi apply --force"
+            ;;
+    esac
+    # Exit 0 so chezmoi apply doesn't hard-fail on a missing optional dep.
+    # When user re-runs after installing, the run_once record forces re-execution
+    # only via --force; alternative is `chezmoi state delete-bucket scriptState`.
     exit 0
 fi
 
