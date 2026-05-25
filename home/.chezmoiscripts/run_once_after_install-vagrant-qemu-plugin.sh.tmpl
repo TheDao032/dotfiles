@@ -1,19 +1,17 @@
-{{- if eq .chezmoi.os "darwin" }}
 #!/usr/bin/env bash
 # Install the vagrant-qemu plugin once (consumer-side for our hardened boxes).
 
 set -euo pipefail
 
+[[ "$(uname -s)" != "Darwin" ]] && exit 0
+
 if ! command -v vagrant >/dev/null 2>&1; then
-    echo "==> vagrant not installed yet — skip plugin install"
-    exit 0
+    echo "==> vagrant not installed yet — skip plugin install"; exit 0
 fi
 
 if vagrant plugin list 2>/dev/null | grep -q '^vagrant-qemu'; then
-    echo "==> vagrant-qemu already installed"
-    exit 0
+    echo "==> vagrant-qemu already installed"; exit 0
 fi
 
 echo "==> Installing vagrant-qemu plugin"
 vagrant plugin install vagrant-qemu
-{{- end }}

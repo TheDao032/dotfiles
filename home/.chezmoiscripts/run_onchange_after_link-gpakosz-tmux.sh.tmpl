@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# run_onchange_after_link-gpakosz-tmux.sh
+#
+# gpakosz/.tmux ships .tmux.conf (with leading dot — for the legacy ~/.tmux.conf
+# location). Modern tmux uses XDG (~/.config/tmux/tmux.conf, no dot prefix).
+# Symlink .tmux.conf → tmux.conf inside ~/.config/tmux so tmux picks it up.
+#
+# This is run_onchange, so it re-fires when this script's content changes.
+
+set -euo pipefail
+
+TMUX_DIR="$HOME/.config/tmux"
+
+if [ ! -f "$TMUX_DIR/.tmux.conf" ]; then
+    echo "==> $TMUX_DIR/.tmux.conf not present yet — external may not be applied"
+    exit 0
+fi
+
+# Create the XDG-style symlink. -sf overwrites any prior symlink.
+ln -sf .tmux.conf "$TMUX_DIR/tmux.conf"
+echo "==> linked $TMUX_DIR/tmux.conf -> .tmux.conf"
+
+# Verify
+if [ -L "$TMUX_DIR/tmux.conf" ] && [ -e "$TMUX_DIR/tmux.conf" ]; then
+    echo "==> ok: tmux.conf resolves to $(readlink "$TMUX_DIR/tmux.conf")"
+else
+    echo "ERROR: tmux.conf symlink broken" >&2
+    exit 1
+fi

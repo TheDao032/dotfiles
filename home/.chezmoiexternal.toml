@@ -19,12 +19,24 @@
     # Critical: our own tmux.conf.local (managed by chezmoi from this repo)
     # must NOT be touched by the external.
     exact  = false
-    filter.exclude = [
-        "README.md",
-        "LICENSE",
-        ".gitignore",
-        ".git*",
-        "tmux.conf.local",         # gpakosz ships a template version named the same — ignore
-        "tmux.conf.local.example",
-        "screenshots*",
+    # `exclude` is the top-level field on the External struct (not filter.exclude —
+    # that's a different feature for piping content through an external command).
+    #
+    # CRITICAL: patterns are matched against the FULL archive path (including the
+    # archive-root dir, e.g. ".tmux-master/README.md") BEFORE stripComponents is
+    # applied. Use `**/` prefix to match at any depth.
+    # https://github.com/twpayne/chezmoi/blob/master/internal/chezmoi/sourcestate.go
+    exclude = [
+        "**/README.md",
+        "**/LICENSE.MIT",
+        "**/LICENSE.WTFPLv2",
+        "**/.gitignore",
+        "**/.gitattributes",
+        "**/.github",
+        "**/.logo",
+        "**/.tmux.conf.local",       # gpakosz's example .local — we use our own (non-dot)
+        "**/tmux.conf.local",        # belt-and-braces if upstream renames
+        "**/tmux.conf.local.example",
+        "**/install.sh",
+        "**/screenshots",
     ]

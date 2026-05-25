@@ -1,17 +1,17 @@
-{{- if eq .chezmoi.os "darwin" }}
 #!/usr/bin/env bash
-# run_onchange_before_install-brew.sh — install Homebrew if missing.
-# Runs BEFORE chezmoi apply, so the brew shellenv is available for later scripts.
-# Re-runs whenever this script's content changes.
+# run_onchange_before_install-brew.sh — install Homebrew if missing (macOS only).
+# Runs BEFORE chezmoi apply so the brew shellenv is available for later scripts.
 
 set -euo pipefail
+
+[[ "$(uname -s)" != "Darwin" ]] && { echo "==> not macOS, skip brew install"; exit 0; }
 
 if ! command -v brew >/dev/null 2>&1; then
     echo "==> Installing Homebrew"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-# Pick up brew on first install (Apple Silicon path)
+# Pick up brew on first install (Apple Silicon uses /opt/homebrew, Intel uses /usr/local).
 {{- if eq .chezmoi.arch "arm64" }}
 [ -x "{{ .paths.homebrew_prefix_arm }}/bin/brew" ] && eval "$({{ .paths.homebrew_prefix_arm }}/bin/brew shellenv)"
 {{- else }}
@@ -19,4 +19,3 @@ fi
 {{- end }}
 
 echo "==> brew $(brew --version | head -1)"
-{{- end }}
