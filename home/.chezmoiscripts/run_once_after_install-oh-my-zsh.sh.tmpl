@@ -35,13 +35,28 @@ if [[ ${#missing[@]} -gt 0 ]]; then
         Linux)
             # Linux: try to auto-install with the detected package manager.
             # Bail gracefully if no PM or no sudo (locked-down systems).
-            INSTALL_CMD=""
+            #
+            # Per-PM commands as ARRAYS — we run each as a separate sudo'd
+            # call so privilege is correctly applied to every step.
+            # (Previously used `eval "$SUDO $INSTALL_CMD"` where INSTALL_CMD
+            # contained `&&` — sudo only applied to the first command, so
+            # `apt-get install` ran without root and failed with
+            # 'Could not open lock file /var/lib/dpkg/lock-frontend'.)
+            PM_NAME=""
+            UPDATE_CMD=()
+            INSTALL_CMD=()
             if   command -v apt-get >/dev/null 2>&1; then
-                INSTALL_CMD="apt-get update && apt-get install -y ${missing[*]}"
+                PM_NAME="apt-get"
+                UPDATE_CMD=(apt-get update)
+                INSTALL_CMD=(apt-get install -y "${missing[@]}")
             elif command -v dnf     >/dev/null 2>&1; then
-                INSTALL_CMD="dnf install -y ${missing[*]}"
+                PM_NAME="dnf"
+                UPDATE_CMD=(true)                            # dnf caches automatically
+                INSTALL_CMD=(dnf install -y "${missing[@]}")
             elif command -v pacman  >/dev/null 2>&1; then
-                INSTALL_CMD="pacman -S --noconfirm ${missing[*]}"
+                PM_NAME="pacman"
+                UPDATE_CMD=(pacman -Sy)
+                INSTALL_CMD=(pacman -S --noconfirm "${missing[@]}")
             else
                 echo "    No supported package manager (apt/dnf/pacman) detected."
                 echo "    Install ${missing[*]} manually, then: chezmoi apply --force"
@@ -50,9 +65,9 @@ if [[ ${#missing[@]} -gt 0 ]]; then
 
             # Decide on sudo: not needed if root; required otherwise.
             if [[ $EUID -eq 0 ]]; then
-                SUDO=""
+                SUDO=()
             elif command -v sudo >/dev/null 2>&1; then
-                SUDO="sudo"
+                SUDO=(sudo)
                 if ! sudo -n true 2>/dev/null; then
                     echo "    (sudo may prompt for your password)"
                 fi
@@ -62,11 +77,19 @@ if [[ ${#missing[@]} -gt 0 ]]; then
                 exit 0
             fi
 
-            echo "    Auto-installing: $SUDO $INSTALL_CMD"
-            if ! eval "$SUDO $INSTALL_CMD"; then
+            echo "    Auto-installing (PM=$PM_NAME): ${UPDATE_CMD[*]} && ${INSTALL_CMD[*]}"
+
+            # Run each command separately so sudo applies to BOTH.
+            # `${SUDO[@]+"${SUDO[@]}"}` is the empty-array guard for set -u.
+            if ! "${SUDO[@]+"${SUDO[@]}"}" "${UPDATE_CMD[@]}"; then
+                echo "==> Package index update FAILED. Inspect output above, then:"
+                echo "      chezmoi apply --force"
+                exit 0
+            fi
+            if ! "${SUDO[@]+"${SUDO[@]}"}" "${INSTALL_CMD[@]}"; then
                 echo "==> Auto-install FAILED. Inspect output above, then:"
                 echo "      chezmoi apply --force"
-                exit 0   # graceful skip — don't hard-fail the apply
+                exit 0
             fi
             ;;
 
