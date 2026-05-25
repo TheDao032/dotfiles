@@ -11,40 +11,73 @@ if [ -d "$HOME/.oh-my-zsh" ]; then
     exit 0
 fi
 
-# oh-my-zsh requires zsh + git to install. macOS ships both; Linux distros
-# don't always. Skip gracefully if either is missing — DON'T auto-install
-# (would need sudo, which chezmoi scripts shouldn't require). Tell the user
-# how to install for their OS, then re-run `chezmoi apply --force`.
+# oh-my-zsh requires zsh + git to install.
+# - macOS: zsh ships with the OS since Catalina; git via Xcode CLT or brew.
+#          Don't auto-install — tell the user how.
+# - Linux: not always pre-installed. AUTO-INSTALL via apt/dnf/pacman if
+#          sudo is available; fall back to graceful skip otherwise.
 missing=()
 command -v zsh >/dev/null 2>&1 || missing+=("zsh")
 command -v git >/dev/null 2>&1 || missing+=("git")
 
-if [ "${#missing[@]}" -gt 0 ]; then
-    echo "==> oh-my-zsh setup skipped — missing: ${missing[*]}"
+if [[ ${#missing[@]} -gt 0 ]]; then
+    echo "==> Missing dependencies for oh-my-zsh: ${missing[*]}"
+
     case "$(uname -s)" in
         Darwin)
+            # macOS: no auto-install. User has Homebrew via the brew script
+            # that runs before this one; they can install with `brew install`.
             echo "    Install with:   brew install ${missing[*]}"
-            ;;
-        Linux)
-            if   command -v apt-get >/dev/null 2>&1; then
-                echo "    Install with:   sudo apt-get install -y ${missing[*]}"
-            elif command -v dnf     >/dev/null 2>&1; then
-                echo "    Install with:   sudo dnf install -y ${missing[*]}"
-            elif command -v pacman  >/dev/null 2>&1; then
-                echo "    Install with:   sudo pacman -S --noconfirm ${missing[*]}"
-            else
-                echo "    Install via your distro's package manager."
-            fi
-            echo
             echo "    Then re-run:    chezmoi apply --force"
+            exit 0
+            ;;
+
+        Linux)
+            # Linux: try to auto-install with the detected package manager.
+            # Bail gracefully if no PM or no sudo (locked-down systems).
+            INSTALL_CMD=""
+            if   command -v apt-get >/dev/null 2>&1; then
+                INSTALL_CMD="apt-get update && apt-get install -y ${missing[*]}"
+            elif command -v dnf     >/dev/null 2>&1; then
+                INSTALL_CMD="dnf install -y ${missing[*]}"
+            elif command -v pacman  >/dev/null 2>&1; then
+                INSTALL_CMD="pacman -S --noconfirm ${missing[*]}"
+            else
+                echo "    No supported package manager (apt/dnf/pacman) detected."
+                echo "    Install ${missing[*]} manually, then: chezmoi apply --force"
+                exit 0
+            fi
+
+            # Decide on sudo: not needed if root; required otherwise.
+            if [[ $EUID -eq 0 ]]; then
+                SUDO=""
+            elif command -v sudo >/dev/null 2>&1; then
+                SUDO="sudo"
+                if ! sudo -n true 2>/dev/null; then
+                    echo "    (sudo may prompt for your password)"
+                fi
+            else
+                echo "    No sudo available. Install ${missing[*]} as root, then:"
+                echo "      chezmoi apply --force"
+                exit 0
+            fi
+
+            echo "    Auto-installing: $SUDO $INSTALL_CMD"
+            if ! eval "$SUDO $INSTALL_CMD"; then
+                echo "==> Auto-install FAILED. Inspect output above, then:"
+                echo "      chezmoi apply --force"
+                exit 0   # graceful skip — don't hard-fail the apply
+            fi
+            ;;
+
+        *)
+            echo "    Unsupported OS: $(uname -s). Skip."
+            exit 0
             ;;
     esac
-    # Exit 0 so chezmoi apply doesn't hard-fail on a missing optional dep.
-    # When user re-runs after installing, the run_once record forces re-execution
-    # only via --force; alternative is `chezmoi state delete-bucket scriptState`.
-    exit 0
 fi
 
+# zsh + git are present (either pre-installed or just auto-installed)
 echo "==> Installing oh-my-zsh (unattended)"
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended --keep-zshrc
 
