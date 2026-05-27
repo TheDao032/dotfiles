@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# Global git pre-commit hook — blocks commits that contain leaked secrets.
+#
+# Activated by core.hooksPath set in ~/.gitconfig:
+#   [core]
+#       hooksPath = ~/.config/git/hooks
+#
+# Runs `gitleaks protect` (which checks STAGED changes only, not the whole
+# repo or history — fast enough for every commit).
+#
+# To bypass for a single commit (use only for clearly-not-a-secret false
+# positives — and add an inline `# gitleaks:allow` comment to silence the
+# detector long-term instead):
+#   git commit --no-verify ...
+
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+    # If gitleaks isn't installed, don't block commits — print warning + continue
+    echo "warning: gitleaks not installed; skipping secret scan" >&2
+    echo "         install via: brew install gitleaks (macOS)" >&2
+    echo "                  or: see https://github.com/gitleaks/gitleaks" >&2
+    exit 0
+fi
+
+# `gitleaks protect --staged` scans only files staged for commit.
+# Faster than `gitleaks detect` (which scans whole working tree + history).
+# Exit non-zero → git aborts the commit.
+gitleaks protect --staged --no-banner --verbose

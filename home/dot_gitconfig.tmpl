@@ -37,6 +37,9 @@
 [core]
     excludesfile = ~/.gitignore
     editor = {{ .tools.editor }}
+    # Managed pre-commit hook runs `gitleaks protect --staged` to block
+    # accidental secret commits. Bypass for a single commit: git commit --no-verify
+    hooksPath = ~/.config/git/hooks
 
 # Nicer diffs (delta if installed, else plain)
 [diff]
