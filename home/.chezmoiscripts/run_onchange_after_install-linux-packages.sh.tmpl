@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# run_onchange_after_install-linux-packages.sh
+#
+# Linux equivalent of brew bundle. Reads ~/.config/apt-packages (a curated
+# package list maintained in chezmoi as home/dot_config/apt-packages) and
+# installs missing packages via apt-get / dnf / pacman.
+#
+# Re-runs when the package list content changes (hash embedded below).
+#
+# Skips silently on:
+#   - non-Linux systems
+#   - systems without sudo (locked-down/CI)
+#   - systems without apt-get / dnf / pacman
+#
+# Package list hash (forces re-run when package list changes):
+# {{ include "dot_config/apt-packages" | sha256sum }}
+
+set -euo pipefail
+
+[[ "$(uname -s)" != "Linux" ]] && exit 0
+
+PKG_FILE="$HOME/.config/apt-packages"
+if [[ ! -f "$PKG_FILE" ]]; then
+    echo "==> $PKG_FILE not found, skip"
+    exit 0
+fi
+
+# Parse: one package per line, ignore comments (# ...) and blank lines.
+mapfile -t PKGS < <(grep -vE '^\s*(#|$)' "$PKG_FILE" | awk '{print $1}')
+
+if [[ ${#PKGS[@]} -eq 0 ]]; then
+    echo "==> $PKG_FILE empty, skip"
+    exit 0
+fi
+
+# ─── Detect package manager + map quirks ────────────────────────────────────
+PM=""
+UPDATE_CMD=()
+INSTALL_CMD=()
+QUERY_INSTALLED=()
+
+if   command -v apt-get >/dev/null 2>&1; then
+    PM="apt-get"
+    UPDATE_CMD=(apt-get update)
+    INSTALL_CMD=(apt-get install -y --no-install-recommends)
+    QUERY_INSTALLED=(dpkg -s)
+elif command -v dnf     >/dev/null 2>&1; then
+    PM="dnf"
+    UPDATE_CMD=(true)                                  # dnf caches automatically
+    INSTALL_CMD=(dnf install -y)
+    QUERY_INSTALLED=(rpm -q)
+elif command -v pacman  >/dev/null 2>&1; then
+    PM="pacman"
+    UPDATE_CMD=(pacman -Sy)
+    INSTALL_CMD=(pacman -S --noconfirm --needed)
+    QUERY_INSTALLED=(pacman -Q)
+else
+    echo "==> no supported package manager (apt/dnf/pacman), skip"
+    exit 0
+fi
+
+# ─── Determine sudo strategy ────────────────────────────────────────────────
+SUDO=()
+if [[ $EUID -ne 0 ]]; then
+    if command -v sudo >/dev/null 2>&1; then
+        SUDO=(sudo)
+    else
+        echo "==> no sudo + not root, skip (install ${#PKGS[@]} packages manually as root)"
+        exit 0
+    fi
+fi
+
+# ─── Figure out which packages are MISSING ──────────────────────────────────
+missing=()
+for p in "${PKGS[@]}"; do
+    if "${QUERY_INSTALLED[@]}" "$p" >/dev/null 2>&1; then
+        continue
+    fi
+    missing+=("$p")
+done
+
+if [[ ${#missing[@]} -eq 0 ]]; then
+    echo "==> All ${#PKGS[@]} packages already installed"
+    exit 0
+fi
+
+echo "==> Installing ${#missing[@]} of ${#PKGS[@]} packages via $PM"
+echo "    Missing: ${missing[*]}"
+echo "    (sudo may prompt for password)"
+
+# Update package index (per-PM)
+if ! "${SUDO[@]+"${SUDO[@]}"}" "${UPDATE_CMD[@]}"; then
+    echo "==> Package index update FAILED, abort"
+    exit 0  # graceful — don't hard-fail chezmoi apply
+fi
+
+# Install. We pass all missing packages in one shot; the PM handles deps.
+# If a single package name is wrong for this distro (e.g. fd-find on Fedora),
+# the PM will error out and we'll see which one. Partial install is still
+# better than no install.
+if ! "${SUDO[@]+"${SUDO[@]}"}" "${INSTALL_CMD[@]}" "${missing[@]}"; then
+    echo "==> Some packages failed to install (likely distro-specific name mismatch)."
+    echo "    Inspect output above. Re-run after fixing the apt-packages file:"
+    echo "      chezmoi apply --force"
+    exit 0
+fi
+
+echo "==> ${#missing[@]} packages installed"

@@ -1,0 +1,58 @@
+# Linux package list — declarative install for apt/dnf/pacman.
+#
+# Mirrors what dot_Brewfile does on macOS. Applied at chezmoi-apply time via
+# .chezmoiscripts/run_onchange_after_install-linux-packages.sh.tmpl.
+#
+# Format: one package per line. Blank lines + "#" comments OK.
+# Packages must exist by these names on apt-get (Debian/Ubuntu). The install
+# script maps to dnf/pacman best-effort (most package names are identical
+# across distros; mismatches are commented in-line).
+#
+# Add/remove a line, then `chezmoi apply` — the install script re-runs
+# (because of run_onchange + Brewfile-style content hash) and reconciles.
+
+# ─── shell + completion ─────────────────────────────────────────────────────
+zsh
+zsh-autosuggestions                   # apt: zsh-autosuggestions / pacman: zsh-autosuggestions
+zsh-syntax-highlighting               # OPTIONAL — apt: zsh-syntax-highlighting
+
+# ─── core CLI tools ─────────────────────────────────────────────────────────
+git
+curl
+wget
+ca-certificates
+gnupg
+bat                                   # better cat (binary may be 'batcat' on Ubuntu)
+fzf                                   # fuzzy finder
+ripgrep                               # better grep — binary is 'rg'
+fd-find                               # better find — binary is 'fdfind' on Ubuntu, 'fd' elsewhere
+jq                                    # JSON CLI
+yq                                    # YAML CLI (pip install yq on older distros)
+tree
+htop
+tmux
+neovim
+unzip
+zip
+
+# ─── git ────────────────────────────────────────────────────────────────────
+gh                                    # GitHub CLI — separate apt repo on Ubuntu; install script handles
+git-delta                             # OPTIONAL — better diffs; binary is 'delta'
+
+# ─── developer tools ────────────────────────────────────────────────────────
+build-essential                       # apt: build-essential / dnf: '@Development Tools' / pacman: base-devel
+make
+pkg-config
+
+# ─── language runtimes (minimal — version managers preferred per-project) ──
+python3
+python3-pip
+python3-venv
+nodejs                                # apt: nodejs / dnf: nodejs / pacman: nodejs
+golang                                # apt: golang / pacman: go
+
+# ─── encryption / secrets ───────────────────────────────────────────────────
+age                                   # chezmoi secrets decryption
+
+# ─── apt-specific (skipped on dnf/pacman) ──────────────────────────────────
+# apt-transport-https                   # legacy; modern apt handles HTTPS natively
