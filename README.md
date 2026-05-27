@@ -70,14 +70,25 @@ source ~/.zshrc                  # new env var in current shell
 │   │   └── config.tmpl                 → ~/.ssh/config (chmod 700 parent)
 │   ├── encrypted_private_dot_envrc.private → ~/.envrc.private (age-decrypted)
 │   ├── dot_config/
-│   │   └── tmux/
-│   │       └── tmux.conf.local         → ~/.config/tmux/tmux.conf.local
-│   │       (tmux.conf comes from gpakosz external)
+│   │   ├── tmux/
+│   │   │   └── tmux.conf.local         → ~/.config/tmux/tmux.conf.local
+│   │   │   (tmux.conf comes from gpakosz external)
+│   │   └── nvim/                       → ~/.config/nvim/
+│   │       ├── init.lua                → ~/.config/nvim/init.lua
+│   │       ├── lua/                    → ~/.config/nvim/lua/
+│   │       ├── after/                  → ~/.config/nvim/after/
+│   │       ├── colors/                 → ~/.config/nvim/colors/
+│   │       ├── snippets/, static/, template/, bin/
+│   │       ├── dot_stylua.toml         → ~/.config/nvim/.stylua.toml
+│   │       ├── dot_styluaignore        → ~/.config/nvim/.styluaignore
+│   │       ├── dot_claude/             → ~/.config/nvim/.claude/
+│   │       └── dot_github/             → ~/.config/nvim/.github/
 │   └── .chezmoiscripts/                → chezmoi-managed install/update scripts
 │       ├── run_onchange_before_install-brew.sh.tmpl
 │       ├── run_onchange_after_install-brew-bundle.sh.tmpl
 │       ├── run_once_after_install-oh-my-zsh.sh.tmpl
-│       └── run_once_after_install-vagrant-qemu-plugin.sh.tmpl
+│       ├── run_once_after_install-vagrant-qemu-plugin.sh.tmpl
+│       └── run_onchange_after_link-gpakosz-tmux.sh.tmpl
 │
 └── docs/
     ├── ONBOARDING.md             ← 5-minute new-machine guide
