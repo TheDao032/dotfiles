@@ -99,6 +99,41 @@ sees the binary blob).
 The age private key (in `~/.config/chezmoi/key.txt`) is the credential
 that unlocks the secrets. Protected by Layers 1-3.
 
+### Layer 5 — pre-commit gitleaks hook (prevents accidental re-introduction)
+
+`home/dot_gitconfig.tmpl` sets `core.hooksPath = ~/.config/git/hooks`, and
+chezmoi deploys `home/dot_config/git/hooks/executable_pre-commit` →
+`~/.config/git/hooks/pre-commit` (executable). On every `git commit` in
+**every repo on this machine**, the hook runs `gitleaks protect --staged`.
+If gitleaks finds a known secret pattern (AWS keys, GitHub PATs, GitLab
+PATs, Stripe keys, ~120 rules total) in the staged diff, the commit is
+**aborted before it lands**.
+
+This is the layer that protects against YOU — the keyboard operator —
+fat-fingering a secret into a tracked file and pushing it to GitHub.
+Layers 1–4 protect against attackers reading data at rest; Layer 5
+protects against you typing it into git.
+
+Verify it's active:
+```bash
+git config --global --get core.hooksPath
+# expect: ~/.config/git/hooks
+ls -la ~/.config/git/hooks/pre-commit
+# expect: -rwxr-xr-x ... (executable)
+```
+
+Bypass for a single commit (use only when you're sure it's a false
+positive — and prefer `# gitleaks:allow` on the line for long-term
+silencing):
+```bash
+git commit --no-verify ...
+```
+
+Graceful-degrade behavior: if `gitleaks` isn't installed on the machine,
+the hook prints a warning and allows the commit. Both `dot_Brewfile`
+(macOS) and `dot_config/apt-packages` (Linux) include gitleaks, so this
+fallback should only fire mid-bootstrap.
+
 ---
 
 ## 3. What's NOT protected (out of scope)

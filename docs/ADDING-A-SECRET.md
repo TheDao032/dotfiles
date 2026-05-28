@@ -145,8 +145,15 @@ chezmoi apply
 - **Comment every secret with its source** (`# from: https://gitlab.com/.../tokens`)
   so future-you knows where to rotate it.
 - **Date-stamp rotations** in commit messages (`chore(secrets): rotate FOO (2026-05-22)`).
-- **Scan before commit**: `gitleaks detect` should pass on the chezmoi source dir
-  (the encrypted file is opaque to gitleaks — it can't detect known patterns inside
-  an age-encrypted blob).
+- **Auto-scan on every commit**: the chezmoi-managed pre-commit hook at
+  `~/.config/git/hooks/pre-commit` runs `gitleaks protect --staged` on every
+  `git commit` in every repo (wired via `core.hooksPath` in `~/.gitconfig`).
+  If you accidentally stage a recognizable secret pattern, the commit is
+  aborted before it lands. The encrypted secrets file itself is opaque to
+  gitleaks (binary blob), so it can't false-positive on rotated values inside.
+  Bypass for a known-false-positive: `git commit --no-verify`. See
+  [SECURITY.md §2 Layer 5](./SECURITY.md#layer-5--pre-commit-gitleaks-hook-prevents-accidental-re-introduction).
+- **Periodic deep scan**: `gitleaks detect` (scans whole working tree + history,
+  not just staged changes) — run before big merges or when adding new file types.
 - **Never `cat ~/.envrc.private`** in screen-shareable contexts. Use `set -o`
   to verify env vars are loaded without printing values.

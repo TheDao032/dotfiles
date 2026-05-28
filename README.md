@@ -22,8 +22,11 @@ chezmoi init --apply git@github.com:TheDao032/dotfiles.git
 That's it. After step 3 you have:
 - `~/.zshrc` rendered from `home/dot_zshrc.tmpl` (templated per OS/arch)
 - `~/.gitconfig`, `~/.zprofile`, `~/.ssh/config`, etc.
-- `~/.Brewfile` + `brew bundle` auto-run → all CLI tools installed
-- `oh-my-zsh` auto-installed
+- **macOS**: `~/.Brewfile` + `brew bundle` auto-run → all CLI tools installed
+- **Linux**: `~/.config/apt-packages` + apt/dnf/pacman auto-installs the same toolset
+- `~/.config/nvim/` rendered (lua config, snippets, colorschemes — all chezmoi-managed)
+- `~/.config/git/hooks/pre-commit` deployed — runs `gitleaks protect --staged` on every commit
+- `oh-my-zsh` auto-installed (auto-installs `zsh`+`git` first on Linux if missing)
 - `vagrant-qemu` plugin auto-installed
 - gpakosz/.tmux pulled fresh, your customizations applied
 - All secrets decrypted from `~/.envrc.private`
@@ -70,9 +73,13 @@ source ~/.zshrc                  # new env var in current shell
 │   │   └── config.tmpl                 → ~/.ssh/config (chmod 700 parent)
 │   ├── encrypted_private_dot_envrc.private → ~/.envrc.private (age-decrypted)
 │   ├── dot_config/
+│   │   ├── apt-packages                   → ~/.config/apt-packages (Linux pkg list — apt/dnf/pacman)
 │   │   ├── tmux/
 │   │   │   └── tmux.conf.local         → ~/.config/tmux/tmux.conf.local
 │   │   │   (tmux.conf comes from gpakosz external)
+│   │   ├── git/
+│   │   │   └── hooks/
+│   │   │       └── executable_pre-commit → ~/.config/git/hooks/pre-commit (gitleaks scan)
 │   │   └── nvim/                       → ~/.config/nvim/
 │   │       ├── init.lua                → ~/.config/nvim/init.lua
 │   │       ├── lua/                    → ~/.config/nvim/lua/
@@ -84,9 +91,10 @@ source ~/.zshrc                  # new env var in current shell
 │   │       ├── dot_claude/             → ~/.config/nvim/.claude/
 │   │       └── dot_github/             → ~/.config/nvim/.github/
 │   └── .chezmoiscripts/                → chezmoi-managed install/update scripts
-│       ├── run_onchange_before_install-brew.sh.tmpl
-│       ├── run_onchange_after_install-brew-bundle.sh.tmpl
-│       ├── run_once_after_install-oh-my-zsh.sh.tmpl
+│       ├── run_onchange_before_install-brew.sh.tmpl              (macOS)
+│       ├── run_onchange_after_install-brew-bundle.sh.tmpl        (macOS)
+│       ├── run_onchange_after_install-linux-packages.sh.tmpl     (Linux — apt/dnf/pacman)
+│       ├── run_once_after_install-oh-my-zsh.sh.tmpl              (auto-installs zsh+git on Linux)
 │       ├── run_once_after_install-vagrant-qemu-plugin.sh.tmpl
 │       └── run_onchange_after_link-gpakosz-tmux.sh.tmpl
 │

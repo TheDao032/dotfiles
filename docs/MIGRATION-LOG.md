@@ -115,34 +115,81 @@ keeping the leaky history off public refs.
 
 ### Open follow-ups (NOT done as part of this restructure)
 
-1. **Rotate GitLab + GitHub tokens ONE more time** — the values shared
-   in this session's chat (`glpat-7ydG5-…`, `ghp_do9I…`) traveled through
-   third-party logs. Generate fresh ones locally and paste via
-   `chezmoi edit ~/.envrc.private`.
+> **Status update — 2026-05-28**: 5 of the 7 follow-ups below are now done; see
+> [Post-restructure additions](#post-restructure-additions-2026-05-27--2026-05-28)
+> below for what shipped and where.
 
-2. **Notify company security team** about the historical Azure SP
-   exposure (Jan 2026 → May 2026). They should check Azure activity logs
-   for any unauthorized SP authentications during that window and rotate
-   the 4 SP secrets on their side.
+1. ✅ **Rotated GitLab + GitHub tokens** (2026-05-28). Fresh values pasted via
+   `chezmoi edit ~/.envrc.private`. Old chat-shared values revoked.
 
-3. **Migrate `~/.config/nvim` into the chezmoi repo.** Currently the
-   live nvim config isn't in version control. Options:
-   - Pull it into `home/dot_config/nvim/` (chezmoi-managed)
-   - Track it as a separate repo (`nvim-config`) referenced via
-     `.chezmoiexternal.toml`
+2. ⏸ **Notify company security team about Azure SP exposure** — N/A as of
+   2026-05-28: user no longer at that company; subscriptions are gone.
+   Marked as not-applicable rather than not-done.
 
-4. **Consider starship prompt** to replace oh-my-zsh `robbyrussell`
+3. ✅ **Migrated `~/.config/nvim` into the chezmoi repo** (commit `50f8074`,
+   2026-05-27). 87 files / 328 KB now at `home/dot_config/nvim/`. Chose
+   the inline option rather than a separate `nvim-config` repo since the
+   config rarely changes independently of other dotfiles.
+
+4. ⏳ **Consider starship prompt** to replace oh-my-zsh `robbyrussell`
    theme (faster shell startup, more configurable, no plugin manager
-   overhead).
+   overhead). Still open — no urgency.
 
-5. **Wire pre-commit hooks** to gitleaks-scan the chezmoi source dir on
-   every commit. `home/dot_gitconfig.tmpl` could reference a global
-   pre-commit config.
+5. ✅ **Wired pre-commit gitleaks hook** (commit `b0601b8`, 2026-05-27).
+   `home/dot_gitconfig.tmpl` sets `core.hooksPath = ~/.config/git/hooks`;
+   `home/dot_config/git/hooks/executable_pre-commit` runs
+   `gitleaks protect --staged`. Verified blocks real-shape GitHub PATs
+   (`ghp_` + 36 alphanum) in a throwaway repo.
 
-6. **Per-machine `chezmoi.toml` overrides**: machines with different
-   roles (e.g., work laptop vs. personal) can have different
-   `[data.machine]` values. Currently every machine uses defaults from
-   `.chezmoidata.toml`.
+6. ⏳ **Per-machine `chezmoi.toml` overrides**: still open — no urgency
+   (user runs only one machine currently).
 
-7. **CI on a self-hosted runner**: run `chezmoi apply --dry-run` +
-   `gitleaks detect` on every PR to catch regressions.
+7. ⏳ **CI on a self-hosted runner**: still open. The local pre-commit
+   hook (#5 above) covers the per-commit case; CI would catch any commit
+   pushed with `--no-verify` or from a machine without the hook.
+
+### Post-restructure additions (2026-05-27 → 2026-05-28)
+
+Follow-on work after the initial cutover, executed in three tiers:
+
+#### Tier B — feature parity gaps
+
+| Commit | What | Why |
+|---|---|---|
+| `50f8074` | Migrate `~/.config/nvim/` → `home/dot_config/nvim/` (87 files / 328 KB) | nvim config was floating outside any VCS; lost on a new machine |
+| `0deb44e` | New `home/dot_config/apt-packages` + `run_onchange_after_install-linux-packages.sh.tmpl` | Linux equivalent of `dot_Brewfile`; auto-detects apt/dnf/pacman |
+| `1c8b4d9` / `2764e51` | oh-my-zsh script auto-installs `zsh`+`git` via apt/dnf/pacman on Linux | Previously failed silently on stock Ubuntu; now bootstraps cleanly |
+
+Also: deleted `~/.config/dotfiles-legacy/` (the pre-restructure repo
+clone was kept for reference; no longer needed once new layout was
+verified for ~5 days).
+
+#### Tier C — pre-commit gitleaks hook
+
+`b0601b8` — `feat(git): add managed pre-commit gitleaks hook`.
+
+- New: `home/dot_config/git/hooks/executable_pre-commit` (chezmoi
+  `executable_` prefix → rendered with `+x`).
+- Modified: `home/dot_gitconfig.tmpl` — adds `hooksPath = ~/.config/git/hooks`
+  under `[core]`.
+- Hook runs `gitleaks protect --staged --no-banner --verbose`. If
+  gitleaks isn't installed, prints a warning and allows the commit
+  through (graceful degrade — `gitleaks` is in both `dot_Brewfile` and
+  `apt-packages`, so it installs during normal bootstrap).
+- Bypass for a single commit: `git commit --no-verify`. Long-term
+  whitelist a value: append `# gitleaks:allow` to the line.
+
+##### Test-value pitfalls (encountered while verifying)
+
+Two false-negative misfires during testing:
+
+1. `AKIAIOSFODNN7EXAMPLE` is in gitleaks' built-in allowlist (canonical
+   AWS docs example) — the hook will not flag it. Don't use it as a
+   test value.
+2. The `github-pat` rule regex is `ghp_[a-zA-Z0-9]{36}` — exactly 36
+   alphanum chars. Off-by-N test tokens silently pass. Generate with:
+   ```bash
+   FAKE="ghp_$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 36)"
+   ```
+   Always test in a throwaway repo like `/tmp/hook-test`, never in the
+   live repo — misfires create real commits you have to reset.

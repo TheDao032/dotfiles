@@ -72,7 +72,10 @@ And in `$HOME` (all chezmoi-managed now):
 | `~/.gitignore` | `home/dot_gitignore` | Global git ignore |
 | `~/.ssh/config` | `home/private_dot_ssh/config.tmpl` | SSH config (chmod 700 parent) |
 | `~/.envrc.private` | `home/encrypted_private_dot_envrc.private` | age-decrypted at apply; mode 600; sourced by `~/.zshrc` |
-| `~/.Brewfile` | `home/dot_Brewfile` | Declarative brew bundle spec |
+| `~/.Brewfile` | `home/dot_Brewfile` | Declarative brew bundle spec (macOS) |
+| `~/.config/apt-packages` | `home/dot_config/apt-packages` | Declarative pkg list for apt/dnf/pacman (Linux) |
+| `~/.config/nvim/**` | `home/dot_config/nvim/**` | Lua config, snippets, colorschemes, etc. |
+| `~/.config/git/hooks/pre-commit` | `home/dot_config/git/hooks/executable_pre-commit` | Runs `gitleaks protect --staged` on every commit |
 | `~/.config/tmux/.tmux.conf` | gpakosz/.tmux external | Refreshed weekly |
 | `~/.config/tmux/tmux.conf.local` | `home/dot_config/tmux/tmux.conf.local` | User customizations |
 | `~/.config/tmux/tmux.conf` | symlink → `.tmux.conf` | Created by chezmoi script |
@@ -125,29 +128,25 @@ Full procedure in [ONBOARDING.md](./ONBOARDING.md).
 
 ---
 
-## Known follow-ups (not blocking; tackle at convenience)
+## Known follow-ups
 
-1. **Rotate GitLab + GitHub tokens one more time** — the current values
-   were shared in chat. Generate fresh ones locally, paste via
-   `chezmoi edit ~/.envrc.private`.
+### Done (post-restructure, 2026-05-27 → 2026-05-28)
 
-2. **Notify company security team** about historical Azure SP exposure
-   (Jan → May 2026 window). They should check Azure activity logs and
-   rotate the 4 SPs on their side.
+1. ✅ **Rotated GitLab + GitHub tokens** (user-side, 2026-05-28). Fresh values in `~/.envrc.private`.
+2. ✅ **Migrated `~/.config/nvim` into the repo** — 87 files / 328 KB now in `home/dot_config/nvim/`. Commit `50f8074`.
+3. ✅ **Linux package list (`apt-packages`) + install script** — declarative parity with `dot_Brewfile` for apt/dnf/pacman. Commit `0deb44e`.
+4. ✅ **Wired pre-commit gitleaks hook** via `core.hooksPath = ~/.config/git/hooks`. Verified blocks real-shape GitHub PATs. Commit `b0601b8`.
+5. ✅ **Deleted `~/.config/dotfiles-legacy/`** — pre-restructure repo no longer needed.
 
-3. **Migrate `~/.config/nvim` into the repo** — currently floating.
+### Out of scope / N/A
 
-4. **Consider starship prompt** to replace oh-my-zsh — faster shell
-   startup, less plugin manager overhead.
+6. ⏸ **Notify company security team about Azure SP exposure** — N/A (no longer at that company; subscription is gone).
 
-5. **Wire pre-commit gitleaks hook** so future commits can't accidentally
-   re-introduce secrets.
+### Still open (no urgency)
 
-6. **Per-machine overrides** via `chezmoi.toml` for when you have a
-   second machine with different needs.
-
-7. **CI on a self-hosted runner** to gate every PR with
-   `chezmoi apply --dry-run` + `gitleaks detect`.
+7. **Consider starship prompt** to replace oh-my-zsh — faster shell startup, less plugin manager overhead.
+8. **Per-machine overrides** via `chezmoi.toml` for when you have a second machine with different needs.
+9. **CI on a self-hosted runner** to gate every PR with `chezmoi apply --dry-run` + `gitleaks detect`. (Pre-commit hook now covers the per-commit case locally.)
 
 ---
 

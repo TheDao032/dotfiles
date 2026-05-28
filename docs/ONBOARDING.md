@@ -59,12 +59,17 @@ chezmoi init --apply git@github.com:TheDao032/dotfiles.git
 This does, in order:
 1. Clones the repo to `~/.local/share/chezmoi/` (chezmoi's default source dir)
 2. Renders `.chezmoi.toml.tmpl` → `~/.config/chezmoi/chezmoi.toml`
-3. Runs `run_onchange_before_install-brew.sh.tmpl` → installs Homebrew if missing
+3. **macOS only** — Runs `run_onchange_before_install-brew.sh.tmpl` → installs Homebrew if missing
 4. Renders + writes all files under `home/` to `$HOME`:
    - `~/.zshrc`, `~/.zprofile`, `~/.gitconfig`, `~/.ssh/config`, etc.
+   - `~/.config/nvim/*` (lua config, snippets, colorschemes)
+   - `~/.config/git/hooks/pre-commit` (gitleaks pre-commit hook, executable)
+   - `~/.config/apt-packages` (Linux package list — no-op on macOS)
    - Decrypts `encrypted_private_dot_envrc.private` → `~/.envrc.private`
-5. Runs `run_onchange_after_install-brew-bundle.sh.tmpl` → `brew bundle ~/.Brewfile`
-6. Runs `run_once_after_install-oh-my-zsh.sh.tmpl` → installs oh-my-zsh
+5. Installs CLI tools (auto-detects the OS):
+   - **macOS** — `run_onchange_after_install-brew-bundle.sh.tmpl` → `brew bundle ~/.Brewfile`
+   - **Linux** — `run_onchange_after_install-linux-packages.sh.tmpl` → reconciles `~/.config/apt-packages` via `apt-get`/`dnf`/`pacman` (uses `sudo`; will prompt for password)
+6. Runs `run_once_after_install-oh-my-zsh.sh.tmpl` → installs oh-my-zsh (on Linux this will also `apt/dnf/pacman install zsh git` if either is missing)
 7. Runs `run_once_after_install-vagrant-qemu-plugin.sh.tmpl` → installs vagrant-qemu
 
 ### 4. Open a new shell
@@ -88,8 +93,27 @@ chezmoi diff                           # should be empty
 ls ~/.config/tmux/tmux.conf            # should exist
 head -3 ~/.config/tmux/tmux.conf       # should say "gpakosz/.tmux"
 
-# Brew installed all the things?
+# Packages installed?
+# macOS:
 brew bundle check --file=~/.Brewfile   # should say "satisfied"
+# Linux:
+which rg fzf bat jq gh delta gitleaks  # should all print paths
+
+# nvim config rendered?
+ls ~/.config/nvim/init.lua             # should exist
+
+# Pre-commit hook deployed + git uses it?
+ls -la ~/.config/git/hooks/pre-commit  # should be executable
+git config --global --get core.hooksPath
+# expect: ~/.config/git/hooks
+
+# Try a real-shape fake leak in /tmp to confirm hook blocks it:
+( cd /tmp && rm -rf hook-check && mkdir hook-check && cd hook-check && \
+  git init -q && git commit -q --allow-empty -m init && \
+  printf 'token: ghp_%s\n' "$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 36)" > s.txt && \
+  git add s.txt && git commit -m 'should-block' 2>&1 | tail -3 && \
+  git log --oneline )
+# expected: gitleaks finds 1 leak, commit aborted, log shows only the init commit.
 
 # Vagrant plugin?
 vagrant plugin list | grep qemu        # should show vagrant-qemu
