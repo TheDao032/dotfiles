@@ -146,8 +146,16 @@ $PATH"
 export RPROMPT='[%{$fg_bold[blue]%} %D{%y/%m/%f} |%@ %{$reset_color%}]'
 
 # ─── interactive niceties ───────────────────────────────────────────────────
-# fzf
-command -v fzf >/dev/null && source <(fzf --zsh)
+# fzf — `fzf --zsh` was added in fzf 0.48 (Dec 2023). Ubuntu apt ships 0.44 and
+# still uses the legacy sourced-scripts approach. Try modern first, fall back.
+if command -v fzf >/dev/null; then
+    if fzf --zsh >/dev/null 2>&1; then
+        source <(fzf --zsh)
+    elif [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
+        source /usr/share/doc/fzf/examples/key-bindings.zsh
+        [[ -f /usr/share/doc/fzf/examples/completion.zsh ]] && source /usr/share/doc/fzf/examples/completion.zsh
+    fi
+fi
 
 # OpenClaw (defensive — only if installed)
 if command -v openclaw &>/dev/null; then
