@@ -8,6 +8,13 @@
     github = "TheDao032"
     gitlab = "nguyenmto"
 
+# Work identity — applied automatically inside ~/Documents/Bosch/ via includeIf
+# in dot_gitconfig.tmpl. Override per-machine in ~/.config/chezmoi/chezmoi.toml
+# if you ever switch employers or work email.
+[work]
+    name  = "adn4hc"
+    email = "adn4hc@bosch.com"
+
 [machine]
     # Default role; override in chezmoi.toml per-host if needed.
     # Used by templates to gate machine-specific config.

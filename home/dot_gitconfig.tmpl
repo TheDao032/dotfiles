@@ -2,6 +2,13 @@
     name  = {{ .user.name }}
     email = {{ .user.email }}
 
+# Multi-account: any repo whose working tree lives under ~/Documents/Bosch/
+# gets the work identity from ~/.gitconfig-work instead of the [user] block above.
+# Trailing `/` is required — without it, git does NOT recurse into subdirectories.
+# Verify per-repo with:  git config user.email
+[includeIf "gitdir:~/Documents/Bosch/"]
+    path = ~/.gitconfig-work
+
 [init]
     defaultBranch = main
 
