@@ -9,9 +9,8 @@ LICENSE
 .DS_Store
 
 # Skip OS-specific files when not on that OS — chezmoi templates these out.
-{{- if ne .chezmoi.os "darwin" }}
-.Brewfile
-{{- end }}
+# .Brewfile now installs on Linux too via linuxbrew; macOS-only entries are
+# gated inside dot_Brewfile.tmpl. So no OS exclusion needed for it anymore.
 {{- if ne .chezmoi.os "linux" }}
 # (placeholder for linux-only files when they exist)
 {{- end }}

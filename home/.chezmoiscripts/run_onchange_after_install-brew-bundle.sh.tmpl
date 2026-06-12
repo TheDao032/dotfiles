@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
-# run_onchange_after_install-brew-bundle.sh — install Brewfile packages (macOS only).
+# run_onchange_after_install-brew-bundle.sh — install Brewfile packages.
+# Runs on both macOS and Linux (linuxbrew). macOS-only entries (casks, colima,
+# pam-reattach, etc.) are gated inside the Brewfile template itself.
 # Re-runs whenever the Brewfile hash changes.
 #
-# Brewfile hash (re-runs script when this changes): {{ include "dot_Brewfile" | sha256sum }}
+# Brewfile hash (re-runs script when this changes): {{ include "dot_Brewfile.tmpl" | sha256sum }}
 
 set -euo pipefail
-[[ "$(uname -s)" != "Darwin" ]] && exit 0
 
+# brew is required. On Linux it's not always pre-installed; if missing, log and
+# skip the bundle (don't fail the whole chezmoi apply — user can install brew
+# later and re-run `chezmoi apply --force` to trigger this).
 if ! command -v brew >/dev/null 2>&1; then
-    echo "==> brew not found — install-brew script must run first"; exit 1
+    # Common linuxbrew prefix — if brew lives there but isn't in PATH yet, use it.
+    if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    else
+        echo "==> brew not found — skipping Brewfile install."
+        echo "    Install brew first (see run_onchange_before_install-brew.sh), then re-run:"
+        echo "    chezmoi apply --force"
+        exit 0
+    fi
 fi
 
 # --no-upgrade: don't auto-upgrade outdated formulae; user does that manually

@@ -31,7 +31,8 @@ yq                                    # YAML CLI (pip install yq on older distro
 tree
 htop
 tmux
-neovim
+# neovim — installed via linuxbrew (apt version stuck at 0.9.x, lacks vim.fs.joinpath).
+# See dot_Brewfile.
 unzip
 zip
 

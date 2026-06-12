@@ -1,6 +1,10 @@
-# Brewfile — declarative install for macOS.
+# Brewfile — declarative install for macOS AND Linux (linuxbrew).
 # Apply with: brew bundle (chezmoi runs this automatically on apply via
 # .chezmoiscripts/run_onchange_after_install-brew-bundle.sh.tmpl).
+#
+# Sections gated `{{`{{ if eq .chezmoi.os "darwin" }}`}}` are macOS-only —
+# linuxbrew has no GUI casks, no PAM/keychain integration, and a few formulae
+# (colima, krunkit, reattach-to-user-namespace) are platform-specific.
 #
 # Auto-generated from `brew leaves` + `brew list --cask` on 2026-05-23.
 # Curated to reflect the actual installed state of this machine + a few
@@ -12,7 +16,9 @@
 
 # ─── Custom taps ────────────────────────────────────────────────────────────
 tap "hashicorp/tap"
-tap "slp/krunkit"
+{{ if eq .chezmoi.os "darwin" -}}
+tap "slp/krunkit"                   # macOS-only — libkrun hypervisor tap
+{{- end }}
 
 # ─── shell + completion ─────────────────────────────────────────────────────
 brew "zsh-autosuggestions"          # auto-suggest history matches
@@ -67,12 +73,14 @@ brew "kubernetes-cli"               # kubectl
 brew "k9s"                          # k8s tui
 
 # ─── container / VM ─────────────────────────────────────────────────────────
-brew "docker"                       # docker client (daemon via colima)
+brew "docker"                       # docker client (daemon via colima on macOS, native on Linux)
 brew "docker-buildx"                # multi-arch builds
 brew "docker-compose"               # multi-container orchestration
-brew "colima"                       # docker daemon on macOS
 brew "qemu"                         # VM emulator (vagrant-qemu plugin uses this)
-brew "slp/krunkit/krunkit"          # libkrun-based hypervisor (vagrant accelerator)
+{{ if eq .chezmoi.os "darwin" -}}
+brew "colima"                       # docker daemon on macOS (Linux uses native dockerd)
+brew "slp/krunkit/krunkit"          # libkrun-based hypervisor (vagrant accelerator) — macOS-only
+{{- end }}
 
 # ─── AI / LLM ───────────────────────────────────────────────────────────────
 brew "ollama"                       # local LLM runtime
@@ -80,11 +88,12 @@ brew "ollama"                       # local LLM runtime
 # ─── misc utilities ─────────────────────────────────────────────────────────
 brew "hunspell"                     # spell checker (used by various editors)
 brew "mermaid-cli"                  # diagram renderer
-brew "pam-reattach"                 # PAM module for tmux + touch ID
 brew "protobuf"                     # protocol buffers compiler
-brew "reattach-to-user-namespace"   # tmux + macOS clipboard fix
+{{ if eq .chezmoi.os "darwin" -}}
+brew "pam-reattach"                 # PAM module for tmux + touch ID — macOS-only
+brew "reattach-to-user-namespace"   # tmux + macOS clipboard fix — macOS-only
 
-# ─── GUI applications (casks) ───────────────────────────────────────────────
+# ─── GUI applications (casks) — macOS-only (linuxbrew has no cask system) ───
 
 # IDE / editors / terminals
 cask "cursor"                       # AI-augmented VS Code fork
@@ -126,6 +135,7 @@ cask "ngrok"                        # tunneling
 # Misc
 cask "parsec"                       # remote desktop
 cask "pdk"                          # Puppet Development Kit
+{{- end }}
 
 # ─── Vagrant plugins (NOT in Brewfile — managed via vagrant plugin install) ──
 # - vagrant-qemu (installed by run_once_after_install-vagrant-qemu-plugin.sh)
