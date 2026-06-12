@@ -10,3 +10,11 @@ Host github-cgaesthetics-certs
     User git
     IdentityFile ~/.ssh/cgaesthetics_mobile_certs_deploy
     IdentitiesOnly yes
+
+# Personal GitHub account (TheDao032) — keeps work `github.com` route default (adn4hc).
+# Use by setting git remotes to `git@github-personal:TheDao032/<repo>.git`.
+Host github-personal
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_personal
+    IdentitiesOnly yes
