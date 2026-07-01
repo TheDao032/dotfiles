@@ -37,6 +37,30 @@ function config.guard()
   ft('go'):fmt('lsp'):append('golines')
   ft('rust'):fmt('rustfmt')
   ft('typescript', 'javascript', 'typescriptreact', 'javascriptreact'):fmt('prettier')
+
+  -- Migrated from formatter.nvim (2026-07-01). NOTE: these now format ON SAVE
+  -- (guard fmt_on_save), whereas formatter.nvim required a manual :Format.
+  ft('terraform'):fmt({
+    cmd = 'terraform',
+    args = { 'fmt', '-' },
+    stdin = true,
+  })
+  ft('hcl'):fmt({
+    cmd = 'terraform',
+    args = { 'fmt', '-' },
+    stdin = true,
+  })
+  -- puppet-lint --fix edits the file in place (stdin=false + fname=true →
+  -- `puppet-lint --fix <file>`). puppet-lint may exit non-zero when unfixable
+  -- warnings remain; if guard rejects the result, keep formatter.nvim for puppet
+  -- or adjust here. Verify on a real .pp file.
+  ft('puppet'):fmt({
+    cmd = 'puppet-lint',
+    args = { '--fix' },
+    stdin = false,
+    fname = true,
+  })
+
   ft('*'):lint('codespell')
 
   vim.g.guard_config = {
@@ -435,129 +459,6 @@ function config.nvim_cmp()
       { name = 'cmdline' },
     }),
     matching = { disallow_symbol_nonprefix_matching = false },
-  })
-end
-
-function config.formatter_nvim()
-  -- Utilities for creating configurations
-  local util = require('formatter.util')
-
-  -- local augroup = vim.api.nvim_create_augroup
-  -- local autocmd = vim.api.nvim_create_autocmd
-  -- augroup('__formatter__', { clear = true })
-  -- autocmd('BufWritePost', {
-  --   group = '__formatter__',
-  --   command = ':FormatWrite',
-  -- })
-
-  -- Provides the Format, FormatWrite, FormatLock, and FormatWriteLock commands
-  require('formatter').setup({
-    -- Enable or disable logging
-    logging = true,
-    -- Set the log level
-    log_level = vim.log.levels.WARN,
-    -- All formatter configurations are opt-in
-    filetype = {
-      -- Formatter configurations for filetype "lua" go here
-      -- and will be executed in order
-      -- lua = {
-      --   -- "formatter.filetypes.lua" defines default configurations for the
-      --   -- "lua" filetype
-      --   require('formatter.filetypes.lua').stylua,
-      --
-      --   -- You can also define your own configuration
-      --   function()
-      --     -- Supports conditional formatting
-      --     if util.get_current_buffer_file_name() == 'special.lua' then
-      --       return nil
-      --     end
-      --
-      --     -- Full specification of configurations is down below and in Vim help
-      --     -- files
-      --     return {
-      --       exe = 'stylua',
-      --       args = {
-      --         '--search-parent-directories',
-      --         '--stdin-filepath',
-      --         util.escape_path(util.get_current_buffer_file_path()),
-      --         '--',
-      --         '-',
-      --       },
-      --       stdin = true,
-      --     }
-      --   end,
-      -- },
-
-      terraform = {
-        -- "formatter.filetypes.terraform" defines default configurations for the
-        -- "terraform" filetype
-        require('formatter.filetypes.terraform').terraformfmt,
-
-        -- You can also define your own configuration
-        function()
-          -- Supports conditional formatting
-          -- Full specification of configurations is down below and in Vim help
-          -- if util.get_current_buffer_file_name() == 'special.lua' then
-          --   return nil
-          -- end
-
-          -- files
-          return {
-            exe = 'terraform',
-            args = { 'fmt', '-' },
-            stdin = true,
-          }
-        end,
-      },
-
-      hcl = {
-        -- "formatter.filetypes.hcl" defines default configurations for the
-        -- "hcl" filetype
-        -- require('formatter.filetypes.hcl'),
-
-        -- You can also define your own configuration
-        function()
-          -- files
-          return {
-            exe = 'terraform',
-            args = { 'fmt', '-' },
-            stdin = true,
-          }
-        end,
-      },
-
-      puppet = {
-        -- "formatter.filetypes.puppet" defines default configurations for the
-        -- "puppet" filetype
-        -- require('formatter.filetypes.puppet'),
-
-        -- You can also define your own configuration
-        function()
-          -- files
-          return {
-            exe = 'puppet-lint',
-            args = {
-              '--fix',
-              util.escape_path(util.get_current_buffer_file_path()),
-              '>',
-              '/dev/null',
-              '2>&1',
-            },
-            stdin = true,
-          }
-        end,
-      },
-
-      -- Use the special "*" filetype for defining formatter configurations on
-      -- any filetype
-      ['*'] = {
-        -- "formatter.filetypes.any" defines default configurations for any
-        -- filetype
-        require('formatter.filetypes.any').remove_trailing_whitespace,
-        -- Remove trailing whitespace without 'sed'
-        -- require("formatter.filetypes.any").substitute_trailing_whitespace,
-      },
-    },
   })
 end
 

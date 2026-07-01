@@ -16,7 +16,7 @@ packadd({
 
 packadd({
   'nvimdev/guard.nvim',
-  ft = { 'c', 'cpp', 'rust', 'lua', 'go', 'typescript', 'javascript', 'javascriptreact', 'markdown' },
+  ft = { 'c', 'cpp', 'rust', 'lua', 'go', 'typescript', 'javascript', 'javascriptreact', 'markdown', 'terraform', 'hcl', 'puppet' },
   config = conf.guard,
   dependencies = {
     { 'nvimdev/guard-collection' },
@@ -123,11 +123,6 @@ packadd({
 --   config = conf.nvim_null_ls,
 --   dependencies = { 'nvim-lua/plenary.nvim' },
 -- })
-
-packadd({
-  'mhartington/formatter.nvim',
-  config = conf.formatter_nvim,
-})
 
 -- packadd({
 --   '3rd/diagram.nvim',

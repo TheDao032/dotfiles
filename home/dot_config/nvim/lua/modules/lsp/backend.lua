@@ -244,7 +244,7 @@ local servers = {
   'yamlls',
   'clangd',
   'puppet',
-  'dartls',
+  -- 'dartls', -- owned by flutter-tools.nvim; don't double-configure via lspconfig (2026-07-01)
   'ts_ls',
   -- 'dcmls',
   -- 'ast_grep',

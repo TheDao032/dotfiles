@@ -103,3 +103,20 @@ local platform = require('core.platform')
 if platform.clipboard then
   vim.g.clipboard = platform.clipboard
 end
+
+-- Strip trailing whitespace on save, all filetypes.
+-- Migrated from formatter.nvim's `*` remove_trailing_whitespace (2026-07-01).
+-- Must live here (startup, global) — guard.nvim's ft('*') can't format, and its
+-- config is lazy-loaded. Skips filetypes where trailing whitespace is meaningful.
+vim.api.nvim_create_autocmd('BufWritePre', {
+  group = vim.api.nvim_create_augroup('strip_trailing_whitespace', { clear = true }),
+  callback = function()
+    local skip = { markdown = true, diff = true, gitsendemail = true, mail = true }
+    if skip[vim.bo.filetype] then
+      return
+    end
+    local view = vim.fn.winsaveview()
+    vim.cmd([[keeppatterns %s/\s\+$//e]])
+    vim.fn.winrestview(view)
+  end,
+})
