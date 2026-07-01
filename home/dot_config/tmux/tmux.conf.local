@@ -375,10 +375,13 @@ tmux_conf_urlscan_options="--compact --dedupe"
 # this is the place to override or undo settings
 
 # increase history size
-#set -g history-limit 10000
+set -g history-limit 50000
 
 # start with mouse mode enabled
-#set -g mouse on
+# (required for: scroll-wheel scrollback, click-drag selection with yellow
+#  mode-style, and tmux-pane-aware text capture. Without this, kitty
+#  intercepts selection and you get its translucent box + screen-grid copy.)
+set -g mouse on
 
 # force Vi mode
 #   really you should export VISUAL or EDITOR environment variable, see manual

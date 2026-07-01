@@ -15,10 +15,18 @@
 # AFTER removing from this file (otherwise next apply re-installs it).
 
 # ─── Custom taps ────────────────────────────────────────────────────────────
+# NOTE (Apple Silicon Mac): tapping hashicorp/tap triggers a cosmetic error
+# during `brew bundle` import scan:
+#   Error: Failed to import: .../hashicorp/homebrew-tap/Formula/vagrant.rb
+#   hashicorp/tap/vagrant: formula requires at least a URL
+# Cause: hashicorp/tap's vagrant.rb only defines a URL for `OS.linux? && Hardware::CPU.intel?`.
+# On macOS the formula has no URL → Homebrew refuses to import it. The error is
+# unavoidable here because:
+#   - we NEED this tap for packer + terraform (no longer in homebrew-core post-BUSL),
+#   - vagrant on Mac is delivered by `cask "vagrant"` (line ~126) — not by this formula.
+# So the error is loud but harmless; `brew bundle complete!` still prints at the end.
+# Verified 2026-06-12 (Dao).
 tap "hashicorp/tap"
-{{ if eq .chezmoi.os "darwin" -}}
-tap "slp/krunkit"                   # macOS-only — libkrun hypervisor tap
-{{- end }}
 
 # ─── shell + completion ─────────────────────────────────────────────────────
 brew "zsh-autosuggestions"          # auto-suggest history matches
@@ -78,8 +86,7 @@ brew "docker-buildx"                # multi-arch builds
 brew "docker-compose"               # multi-container orchestration
 brew "qemu"                         # VM emulator (vagrant-qemu plugin uses this)
 {{ if eq .chezmoi.os "darwin" -}}
-brew "colima"                       # docker daemon on macOS (Linux uses native dockerd)
-brew "slp/krunkit/krunkit"          # libkrun-based hypervisor (vagrant accelerator) — macOS-only
+brew "colima"                       # docker daemon on macOS (vz/Apple Virtualization driver; Linux uses native dockerd)
 {{- end }}
 
 # ─── AI / LLM ───────────────────────────────────────────────────────────────
