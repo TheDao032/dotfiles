@@ -97,17 +97,9 @@ end
 
 vim.opt.stc = '%!v:lua.show_stc()'
 
-if vim.uv.os_uname().sysname == 'Darwin' then
-  vim.g.clipboard = {
-    name = 'macOS-clipboard',
-    copy = {
-      ['+'] = 'pbcopy',
-      ['*'] = 'pbcopy',
-    },
-    paste = {
-      ['+'] = 'pbpaste',
-      ['*'] = 'pbpaste',
-    },
-    cache_enabled = 0,
-  }
+-- OS-specific clipboard provider (macOS pbcopy / Wayland wl-copy / X11 xclip/xsel).
+-- Resolved in core.platform; nil means let neovim auto-detect.
+local platform = require('core.platform')
+if platform.clipboard then
+  vim.g.clipboard = platform.clipboard
 end
