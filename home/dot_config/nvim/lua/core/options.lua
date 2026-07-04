@@ -1,6 +1,15 @@
 local api = vim.api
 local opt = vim.opt
 
+-- Template files → filetype `template` (nvim gives *.tmpl this already, but not *.tftpl).
+-- Commentstring for it is set in after/ftplugin/template.lua.
+vim.filetype.add({
+  extension = {
+    tmpl = 'template',
+    tftpl = 'template',
+  },
+})
+
 opt.hidden = true
 opt.magic = true
 opt.virtualedit = 'block'

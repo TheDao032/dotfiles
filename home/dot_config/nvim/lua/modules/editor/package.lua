@@ -31,10 +31,27 @@ packadd({
 packadd({
   'numToStr/Comment.nvim',
   config = function()
-    require('Comment').setup()
+    require('Comment').setup({
+      -- nvim 0.12 + archived Comment.nvim: ft.calculate crashes ("[Comment.nvim] nil")
+      -- when vim.treesitter.get_parser returns nil — i.e. any filetype with NO parser
+      -- (e.g. `template` from *.tmpl/*.tftpl). Bypass the treesitter path ONLY for those
+      -- parserless buffers (use their commentstring); parsered filetypes return nil and
+      -- fall through to the normal ts-aware path (keeps jsx/tsx/markdown context-commenting).
+      pre_hook = function()
+        local ok, parser = pcall(vim.treesitter.get_parser, 0)
+        if not ok or parser == nil then
+          local cs = vim.bo.commentstring
+          if cs and cs ~= '' then
+            return cs
+          end
+        end
+        return nil
+      end,
+    })
 
+    -- Base commentstrings for #-comment filetypes. 'template' = *.tmpl / *.tftpl.
     local ft = require('Comment.ft')
-    ft({ 'tftpl', 'tmpl', 'hcl', 'tf' }, '#%s')
+    ft({ 'template', 'hcl', 'tf' }, '#%s')
   end,
 })
 

@@ -70,6 +70,8 @@ function config.nvim_treesitter()
       'jsonc',
       'vimdoc',
       'puppet',
+      'hcl', -- terragrunt/.hcl — also needed so Comment.nvim's ts commentstring lookup doesn't crash
+      'terraform', -- .tf — same reason
     },
 
     auto_install = true,
