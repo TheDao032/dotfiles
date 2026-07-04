@@ -7,7 +7,6 @@ local util = require('lspconfig.util')
 -- local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd
 -- augroup('__formatter__', { clear = true })
-local augroup = vim.api.nvim_create_augroup('LspFormatting', { clear = true })
 
 M.capabilities = require('cmp_nvim_lsp').default_capabilities()
 -- M.capabilities =
@@ -35,11 +34,10 @@ function M._attach(client, bufnr)
   end
   vim.notify = mynotify
 
-  autocmd('BufWritePost', {
-    group = augroup,
-    buffer = bufnr,
-    command = ':FormatWrite',
-  })
+  -- NOTE: format-on-save is owned by guard.nvim (fmt_on_save = true) since the
+  -- 2026-07-01 formatter.nvim → guard.nvim migration. The old BufWritePost →
+  -- ':FormatWrite' autocmd was a formatter.nvim leftover; ':FormatWrite' no
+  -- longer exists, so it threw E492 on every LSP-attached buffer save. Removed.
 
   autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI' }, {
     pattern = '*',
@@ -234,7 +232,6 @@ local servers = {
   'zls',
   'dockerls',
   'terraformls',
-  'terraform_lsp',
   'ansiblels',
   'ruby_lsp',
   'helm_ls',
@@ -256,6 +253,13 @@ for _, server in ipairs(servers) do
     capabilities = M.capabilities,
   }
 end
+
+-- terraform-ls also serves terragrunt *.hcl files (basic HCL completion).
+-- Default terraformls binds only to terraform/terraform-vars, so extend it.
+-- (vim.lsp.config(name, cfg) merges into the config set above.)
+lspconfig('terraformls', {
+  filetypes = { 'terraform', 'terraform-vars', 'hcl' },
+})
 
 vim.lsp.handlers['workspace/diagnostic/refresh'] = function(_, _, ctx)
   local ns = vim.lsp.diagnostic.get_namespace(ctx.client_id)

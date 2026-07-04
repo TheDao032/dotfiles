@@ -32,6 +32,9 @@ g.my_program_ft = {
   'typescript',
   'typescriptreact',
   'json',
+  'terraform',
+  'terraform-vars',
+  'hcl', -- terragrunt (*.hcl) — so nvim-lspconfig loads + terraform-ls attaches
 }
 
 require('core.pack'):boot_strap()
