@@ -3,17 +3,63 @@
 My personal dotfiles for macOS (Apple Silicon + Intel) and Linux.
 Managed with [chezmoi](https://www.chezmoi.io/), secrets encrypted with [age](https://age-encryption.org/).
 
-## Bootstrap a new machine (5 minutes)
+## Setup
+
+There are **two** scenarios — pick the one that matches you:
+
+- **A. First-time setup** — establishing these dotfiles + age encryption from scratch, when **no age key exists yet**. Do this **once, ever**.
+- **B. New machine** — the repo and age key already exist; you're onboarding another box. This is the common case (~5 minutes).
+
+> ⚠️ **On a new machine, RESTORE the existing age key — do NOT generate a new one.**
+> The repo's encrypted files are locked to the recipient `age1yykdvcl7hu2kf4klk854atdkawhutj4dq54zpg98hc03s35hdycqmrdlz4`.
+> A freshly generated key will **not** decrypt them. Only generate a key for scenario A (or a deliberate key rotation — see [docs/ADDING-A-SECRET.md](docs/ADDING-A-SECRET.md#rotating-the-age-key)).
+
+### A. First-time setup — establish the age key (once, ever)
+
+This is the step people forget: **the age keypair must exist before chezmoi can encrypt/decrypt anything.**
 
 ```bash
-# 1. Install chezmoi (no other deps required yet)
-brew install chezmoi age   # macOS
+# 1. Install chezmoi + age
+brew install chezmoi age                       # macOS
 # OR on Linux:
-sh -c "$(curl -fsLS get.chezmoi.io)"
+sh -c "$(curl -fsLS get.chezmoi.io)" && sudo apt install age   # (dnf/pacman on Fedora/Arch)
 
-# 2. Restore your age private key (from password manager) to:
-#    ~/.config/chezmoi/key.txt
-#    chmod 600 ~/.config/chezmoi/key.txt
+# 2. Generate the age keypair  ← the "create the private key first" step
+mkdir -p ~/.config/chezmoi
+age-keygen -o ~/.config/chezmoi/key.txt
+chmod 600 ~/.config/chezmoi/key.txt
+#   age-keygen prints:  Public key: age1........   ← this is your RECIPIENT
+
+# 3. Wire the PUBLIC key into chezmoi's encryption config:
+#    edit  home/.chezmoi.toml.tmpl  →  [age] recipient = "<public key from step 2>"
+#    (the identity/private-key path is already ~/.config/chezmoi/key.txt)
+
+# 4. Back up the PRIVATE key to your password manager IMMEDIATELY
+#    Entry "chezmoi age key" ← paste the full contents of ~/.config/chezmoi/key.txt
+#    (starts with `# created:` / `# public key:` / `AGE-SECRET-KEY-1...`)
+
+# 5. Encrypt your secrets and apply
+chezmoi add --encrypt ~/.envrc.private         # → home/encrypted_private_dot_envrc.private
+chezmoi apply
+```
+
+> 🔑 **Losing the private key = losing every encrypted secret.** Step 4 is not optional.
+
+### B. New machine — key already exists (the common case)
+
+```bash
+# 1. Install chezmoi + age
+brew install chezmoi age                       # macOS
+# OR on Linux:
+sh -c "$(curl -fsLS get.chezmoi.io)" && sudo apt install age
+
+# 2. RESTORE your age private key from your password manager
+mkdir -p ~/.config/chezmoi
+$EDITOR ~/.config/chezmoi/key.txt              # paste the saved key contents
+chmod 600 ~/.config/chezmoi/key.txt
+#    verify it's the right key (must match the repo's recipient):
+grep '^# public key:' ~/.config/chezmoi/key.txt
+#    → age1yykdvcl7hu2kf4klk854atdkawhutj4dq54zpg98hc03s35hdycqmrdlz4
 
 # 3. Init from this repo and apply
 chezmoi init --apply git@github.com:TheDao032/dotfiles.git
