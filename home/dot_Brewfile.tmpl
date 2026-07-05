@@ -15,17 +15,19 @@
 # AFTER removing from this file (otherwise next apply re-installs it).
 
 # ─── Custom taps ────────────────────────────────────────────────────────────
-# NOTE (Apple Silicon Mac): tapping hashicorp/tap triggers a cosmetic error
-# during `brew bundle` import scan:
-#   Error: Failed to import: .../hashicorp/homebrew-tap/Formula/vagrant.rb
+# NOTE (all Macs — Apple Silicon AND Intel): tapping hashicorp/tap triggers a
+# cosmetic error during `brew bundle`'s import scan:
+#   Error: Failed to load formula: vagrant
 #   hashicorp/tap/vagrant: formula requires at least a URL
+#   Warning: Treating vagrant as a cask.      ← Homebrew RECOVERS here
 # Cause: hashicorp/tap's vagrant.rb only defines a URL for `OS.linux? && Hardware::CPU.intel?`.
-# On macOS the formula has no URL → Homebrew refuses to import it. The error is
-# unavoidable here because:
+# On macOS (either chip) the formula has no URL → Homebrew refuses to load it, then
+# falls back to the cask. This is unavoidable while the tap is present because:
 #   - we NEED this tap for packer + terraform (no longer in homebrew-core post-BUSL),
-#   - vagrant on Mac is delivered by `cask "vagrant"` (line ~126) — not by this formula.
-# So the error is loud but harmless; `brew bundle complete!` still prints at the end.
-# Verified 2026-06-12 (Dao).
+#   - vagrant on Mac is delivered by `cask "vagrant"` below — not by this formula.
+# The "Warning: Treating vagrant as a cask" line means it RECOVERED — this error is
+# NOT what fails `brew bundle`. It is loud but harmless on Intel too.
+# Verified 2026-06-12 (Dao); re-confirmed on Intel MacBook Pro 2018, 2026-07-04.
 tap "hashicorp/tap"
 
 # ─── shell + completion ─────────────────────────────────────────────────────
@@ -141,7 +143,14 @@ cask "ngrok"                        # tunneling
 
 # Misc
 cask "parsec"                       # remote desktop
-cask "pdk"                          # Puppet Development Kit
+# cask "pdk"                        # Puppet Development Kit — REMOVED from Homebrew.
+#                                     The cask was deleted upstream. `brew bundle` then
+#                                     treats the missing cask as a formula, finds none
+#                                     ("No available formula with the name pdk"), and
+#                                     ABORTS the whole run — THIS is what failed the
+#                                     bundle on the Intel MacBook Pro 2018 (2026-07-04).
+#                                     If you still need PDK, install it from
+#                                     https://www.puppet.com/docs/pdk/ — do NOT re-add here.
 {{- end }}
 
 # ─── Vagrant plugins (NOT in Brewfile — managed via vagrant plugin install) ──

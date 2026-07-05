@@ -8,6 +8,10 @@ LICENSE
 # Skip macOS Finder cruft
 .DS_Store
 
+# Skip stray editor/tool logs accidentally created in the source dir
+# (e.g. nvim.log dropped here on 2026-07-04 would otherwise deploy to ~/nvim.log)
+*.log
+
 # Skip OS-specific files when not on that OS — chezmoi templates these out.
 # .Brewfile now installs on Linux too via linuxbrew; macOS-only entries are
 # gated inside dot_Brewfile.tmpl. So no OS exclusion needed for it anymore.

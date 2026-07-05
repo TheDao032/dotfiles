@@ -62,8 +62,21 @@ grep '^# public key:' ~/.config/chezmoi/key.txt
 #    → age1yykdvcl7hu2kf4klk854atdkawhutj4dq54zpg98hc03s35hdycqmrdlz4
 
 # 3. Init from this repo and apply
+#    `chezmoi init` CLONES the repo into ~/.local/share/chezmoi AND renders the
+#    config template home/.chezmoi.toml.tmpl → ~/.config/chezmoi/chezmoi.toml.
+#    You do NOT hand-write chezmoi.toml — init generates it (that's where
+#    `encryption = "age"` comes from). `--apply` then applies in the same step.
 chezmoi init --apply git@github.com:TheDao032/dotfiles.git
+
+# 4. Verify the clone + config actually happened (see Troubleshooting if not):
+chezmoi git -- log --oneline -1          # must show a commit, NOT "no commits yet"
+test -f ~/.config/chezmoi/chezmoi.toml && echo "config generated ✓"
 ```
+
+> ⚠️ **Do NOT run a bare `chezmoi init` (no URL) first.** It creates an *empty*
+> `~/.local/share/chezmoi` git repo, and a later `chezmoi init <url>` will **not**
+> clone into the now-existing directory — leaving you with no files and no config,
+> which surfaces as `chezmoi: encryption not configured` on apply. See Troubleshooting.
 
 That's it. After step 3 you have:
 - `~/.zshrc` rendered from `home/dot_zshrc.tmpl` (templated per OS/arch)
@@ -76,6 +89,56 @@ That's it. After step 3 you have:
 - `vagrant-qemu` plugin auto-installed
 - gpakosz/.tmux pulled fresh, your customizations applied
 - All secrets decrypted from `~/.envrc.private`
+
+## Troubleshooting
+
+### `chezmoi: encryption not configured` on apply
+
+This almost always means **`chezmoi init` never actually cloned the repo**, so the
+config template was never rendered and `encryption = "age"` was never set. Confirm:
+
+```bash
+chezmoi git -- log --oneline -1        # "your current branch 'main' does not have any
+                                       #  commits yet"  →  the clone is empty/broken
+ls ~/.local/share/chezmoi              # only a .git folder, no files  →  same problem
+ls ~/.config/chezmoi/chezmoi.toml      # missing  →  init didn't render the config template
+```
+
+Fix — remove the empty source dir and re-init from the URL (the empty dir is what
+blocks the clone; your age key at `~/.config/chezmoi/key.txt` is untouched):
+
+```bash
+rm -rf ~/.local/share/chezmoi
+chezmoi init --apply git@github.com:TheDao032/dotfiles.git
+chezmoi git -- log --oneline -1        # now shows a real commit
+```
+
+> Root cause seen on 2026-07-04: a bare `chezmoi init` (or an HTTPS init that failed
+> auth) had left an empty `~/.local/share/chezmoi`; the follow-up `chezmoi init <url>`
+> saw the directory already existed and skipped cloning. Always start from a clean
+> state, and verify with `chezmoi git -- log` right after init.
+
+### `brew bundle` fails during apply
+
+`.chezmoiscripts/run_onchange_after_install-brew-bundle.sh.tmpl` runs `brew bundle`
+with `set -euo pipefail`, so **any** failing Brewfile entry fails the whole `chezmoi apply`.
+
+- **`No available formula with the name "<x>"`** — a `cask "<x>"` was removed from
+  Homebrew. `brew bundle` falls back to a formula, finds none, and aborts. Comment the
+  entry out in `chezmoi edit ~/.Brewfile` (this happened with `pdk`, 2026-07-04).
+- **`hashicorp/tap/vagrant: formula requires at least a URL` / `Treating vagrant as a
+  cask`** — cosmetic tap-scan noise on **all** Macs (Intel included). The `Treating …
+  as a cask` line means Homebrew recovered; this does **not** fail the bundle. Ignore it.
+- After fixing the Brewfile, re-run: `chezmoi apply --force` (forces the `run_onchange`
+  script to re-fire even if the hash is unchanged).
+
+### Intel vs Apple Silicon
+
+Homebrew lives at `/usr/local` on Intel and `/opt/homebrew` on Apple Silicon. The
+templates already branch on `.chezmoi.arch` (`arm64` vs everything else) in
+`dot_zprofile.tmpl`, `dot_zshrc.tmpl`, and the brew install script — no per-machine
+edits needed. If a tool's path looks wrong, check `chezmoi execute-template '{{ .chezmoi.arch }}'`
+returns what you expect (`amd64` on this Intel MacBook Pro 2018).
 
 ## Daily workflow
 
