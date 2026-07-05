@@ -153,6 +153,24 @@ chezmoi git -- pull --rebase
 chezmoi git -- push
 ```
 
+## Trimming packages
+
+`brew bundle` (run on every apply) only **installs** — it never **uninstalls**.
+Removing a line from the Brewfile just stops chezmoi from re-installing it; the
+package stays on disk. To actually remove everything no longer listed:
+
+```bash
+chezmoi edit ~/.Brewfile        # remove the lines you don't want, save
+chezmoi apply                   # re-renders ~/.Brewfile + installs anything new
+brew bundle cleanup --file=~/.Brewfile          # lists what WOULD be removed (dry run)
+brew bundle cleanup --file=~/.Brewfile --force  # actually uninstalls the extras
+```
+
+> The current Brewfile was trimmed on 2026-07-05 to just the Neovim + terminal
+> stack and a focused infra toolset (see the "REMOVED" list at the bottom of
+> `home/dot_Brewfile.tmpl`). `chezmoi apply` alone will NOT uninstall the old
+> packages — run the `cleanup --force` step above for that.
+
 ## Add a new secret
 
 ```bash

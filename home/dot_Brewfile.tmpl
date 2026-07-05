@@ -3,16 +3,15 @@
 # .chezmoiscripts/run_onchange_after_install-brew-bundle.sh.tmpl).
 #
 # Sections gated `{{`{{ if eq .chezmoi.os "darwin" }}`}}` are macOS-only —
-# linuxbrew has no GUI casks, no PAM/keychain integration, and a few formulae
-# (colima, krunkit, reattach-to-user-namespace) are platform-specific.
+# linuxbrew has no GUI casks and no PAM/keychain integration.
 #
-# Auto-generated from `brew leaves` + `brew list --cask` on 2026-05-23.
-# Curated to reflect the actual installed state of this machine + a few
-# additions marked OPTIONAL that I'd recommend.
+# SCOPE (trimmed 2026-07-05): only the Neovim + terminal stack and a focused
+# infrastructure toolset. Language version managers, cloud CLIs, containers,
+# and all non-terminal GUI apps were intentionally removed.
 #
-# To remove an entry: edit this file with `chezmoi edit ~/.Brewfile`,
-# then `chezmoi apply`. To uninstall the brew itself: `brew uninstall <name>`
-# AFTER removing from this file (otherwise next apply re-installs it).
+# NOTE: `brew bundle` only INSTALLS. Removing a line here does NOT uninstall the
+# package — run `brew bundle cleanup --file=~/.Brewfile` to remove anything no
+# longer listed (see README "Trimming packages").
 
 # ─── Custom taps ────────────────────────────────────────────────────────────
 # NOTE (all Macs — Apple Silicon AND Intel): tapping hashicorp/tap triggers a
@@ -30,128 +29,59 @@
 # Verified 2026-06-12 (Dao); re-confirmed on Intel MacBook Pro 2018, 2026-07-04.
 tap "hashicorp/tap"
 
-# ─── shell + completion ─────────────────────────────────────────────────────
-brew "zsh-autosuggestions"          # auto-suggest history matches
-# brew "zsh-syntax-highlighting"    # OPTIONAL — syntax-color commands as you type
-# brew "zsh-completions"            # OPTIONAL — extra completion definitions
-
-# ─── secrets / encryption ───────────────────────────────────────────────────
-brew "age"                          # modern file encryption (chezmoi secrets)
+# ═══ KEEP: dotfiles system (REQUIRED — chezmoi + secrets + pre-commit hook) ═══
+brew "age"                          # file encryption for chezmoi secrets
 brew "chezmoi"                      # this dotfiles manager
-brew "gitleaks"                     # scan repos for committed secrets
+brew "gitleaks"                     # secret scan — used by ~/.config/git/hooks/pre-commit
 
-# ─── core CLI tools ─────────────────────────────────────────────────────────
+# ═══ KEEP: shell + terminal ══════════════════════════════════════════════════
+brew "zsh-autosuggestions"          # auto-suggest history matches
+brew "tmux"                         # terminal multiplexer
 brew "bat"                          # better cat
 brew "btop"                         # better top/htop
 brew "fzf"                          # fuzzy finder
-brew "neovim"                       # editor
-brew "tmux"                         # terminal multiplexer
-brew "tree-sitter-cli"              # syntax parser (used by neovim treesitter)
 brew "watch"                        # repeat command + show output
 brew "wget"                         # http downloader
-
-# ─── git ────────────────────────────────────────────────────────────────────
 brew "gh"                           # GitHub CLI
 brew "lazygit"                      # tui git
-# brew "git-delta"                  # OPTIONAL — better diffs in git
 
-# ─── developer / language runtimes ──────────────────────────────────────────
-# Version managers (NOT the runtimes themselves — install per-project)
-brew "jenv"                         # Java version manager
-brew "nvm"                          # Node version manager
-brew "rbenv"                        # Ruby version manager
-brew "rustup"                       # Rust toolchain installer
+# ═══ KEEP: Neovim ════════════════════════════════════════════════════════════
+brew "neovim"                       # editor
+brew "tree-sitter-cli"              # syntax parser (neovim treesitter)
+brew "hunspell"                     # spell checker (neovim / editors)
 
-# Language-specific deps for compile flags (referenced in dot_zshrc.tmpl)
-brew "openjdk"                      # default Java
-brew "openjdk@17"                   # pinned Java 17 (specific projects need it)
+# ═══ KEEP: infrastructure / devops ═══════════════════════════════════════════
 brew "go"                           # Go language
-
-# Python (system Python + tk for some GUI libs)
-brew "python-tk@3.14"
-
-# ─── infra / devops ─────────────────────────────────────────────────────────
-brew "ansible"
-brew "hashicorp/tap/packer"
-brew "hashicorp/tap/terraform"
+brew "ansible"                      # config management
+brew "hashicorp/tap/packer"         # image builder
+brew "hashicorp/tap/terraform"      # IaC
 brew "terragrunt"                   # terraform wrapper
-brew "awscli"
-brew "azure-cli"
 brew "argocd"                       # GitOps for k8s
 brew "helm"                         # k8s package manager
 brew "kubernetes-cli"               # kubectl
 brew "k9s"                          # k8s tui
+brew "qemu"                         # vagrant provider (vagrant-qemu plugin uses this)
 
-# ─── container / VM ─────────────────────────────────────────────────────────
-brew "docker"                       # docker client (daemon via colima on macOS, native on Linux)
-brew "docker-buildx"                # multi-arch builds
-brew "docker-compose"               # multi-container orchestration
-brew "qemu"                         # VM emulator (vagrant-qemu plugin uses this)
 {{ if eq .chezmoi.os "darwin" -}}
-brew "colima"                       # docker daemon on macOS (vz/Apple Virtualization driver; Linux uses native dockerd)
-{{- end }}
+# ═══ KEEP: macOS-only (PAM / casks) ══════════════════════════════════════════
+brew "pam-reattach"                 # tmux + Touch ID
+brew "reattach-to-user-namespace"   # tmux + macOS clipboard
 
-# ─── AI / LLM ───────────────────────────────────────────────────────────────
-brew "ollama"                       # local LLM runtime
-
-# ─── misc utilities ─────────────────────────────────────────────────────────
-brew "hunspell"                     # spell checker (used by various editors)
-brew "mermaid-cli"                  # diagram renderer
-brew "protobuf"                     # protocol buffers compiler
-{{ if eq .chezmoi.os "darwin" -}}
-brew "pam-reattach"                 # PAM module for tmux + touch ID — macOS-only
-brew "reattach-to-user-namespace"   # tmux + macOS clipboard fix — macOS-only
-
-# ─── GUI applications (casks) — macOS-only (linuxbrew has no cask system) ───
-
-# IDE / editors / terminals
-cask "cursor"                       # AI-augmented VS Code fork
 cask "kitty@nightly"                # GPU-accelerated terminal
-
-# AI tools
-cask "claude"                       # Anthropic Claude desktop
-cask "claude-code"                  # Anthropic CLI agent
-cask "codex"                        # codex AI
-
-# Mobile / cross-platform dev
-cask "android-commandlinetools"
-cask "flutter"
-
-# Browsers
-cask "google-chrome"
-cask "firefox"
-
-# Communication
-cask "slack"
-cask "microsoft-teams"
-cask "discord"
-
-# Productivity
-cask "obsidian"                     # knowledge base
-cask "figma"
-cask "spotify"
-
-# VM / virtualization
-cask "vagrant"                      # VM orchestrator
-cask "virtualbox"                   # VM hypervisor
-cask "utm"                          # macOS-native QEMU GUI
-
-# Security / network
-cask "bitwarden"                    # password manager (UI)
-cask "cloudflare-warp"              # VPN
-cask "ngrok"                        # tunneling
-
-# Misc
-cask "parsec"                       # remote desktop
-# cask "pdk"                        # Puppet Development Kit — REMOVED from Homebrew.
-#                                     The cask was deleted upstream. `brew bundle` then
-#                                     treats the missing cask as a formula, finds none
-#                                     ("No available formula with the name pdk"), and
-#                                     ABORTS the whole run — THIS is what failed the
-#                                     bundle on the Intel MacBook Pro 2018 (2026-07-04).
-#                                     If you still need PDK, install it from
-#                                     https://www.puppet.com/docs/pdk/ — do NOT re-add here.
+cask "vagrant"                      # VM orchestrator (provider: qemu, above)
 {{- end }}
 
 # ─── Vagrant plugins (NOT in Brewfile — managed via vagrant plugin install) ──
 # - vagrant-qemu (installed by run_once_after_install-vagrant-qemu-plugin.sh)
+
+# ─── REMOVED 2026-07-05 (kept out on purpose; re-add if needed) ──────────────
+# lang managers/runtimes : jenv nvm rbenv rustup openjdk openjdk@17 python-tk@3.14
+# cloud CLIs             : awscli azure-cli
+# containers             : docker docker-buildx docker-compose colima
+# AI/LLM                 : ollama
+# dev tools              : mermaid-cli protobuf
+# GUI casks              : cursor claude claude-code codex android-commandlinetools
+#                          flutter google-chrome firefox slack microsoft-teams
+#                          discord obsidian figma spotify virtualbox utm bitwarden
+#                          cloudflare-warp ngrok parsec
+# (pdk cask was deleted from Homebrew upstream — do NOT re-add; it aborts brew bundle.)
