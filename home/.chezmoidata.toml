@@ -11,9 +11,15 @@
 # Work identity — applied automatically inside ~/Documents/Bosch/ via includeIf
 # in dot_gitconfig.tmpl. Override per-machine in ~/.config/chezmoi/chezmoi.toml
 # if you ever switch employers or work email.
+#
+# signingkey: GPG long key ID used for signed commits in Bosch repos.
+# `gpg --list-secret-keys --keyid-format=long` to inspect.
+# Per-machine — override in ~/.config/chezmoi/chezmoi.toml if the key differs.
+# Leave empty to disable signing on a given machine.
 [work]
-    name  = "adn4hc"
-    email = "adn4hc@bosch.com"
+    name       = "adn4hc"
+    email      = "adn4hc@bosch.com"
+    signingkey = "8BCAB24AA426D5A7"
 
 [machine]
     # Default role; override in chezmoi.toml per-host if needed.
@@ -26,7 +32,19 @@
     # Default shell prompt theme name (for oh-my-zsh).
     omz_theme = "robbyrussell"
     # List of oh-my-zsh plugins to enable.
-    omz_plugins = ["git", "poetry", "kubectl", "docker"]
+    # NOTE: zsh-syntax-highlighting MUST be last — it wraps ZLE; anything loaded
+    # after it can break highlighting. zsh-autosuggestions should come just before.
+    # The three zsh-users plugins are cloned into $ZSH_CUSTOM/plugins by
+    # .chezmoiscripts/run_onchange_after_install-omz-plugins.sh.tmpl
+    omz_plugins = [
+      "git",
+      "poetry",
+      "kubectl",
+      "docker",
+      "zsh-completions",
+      "zsh-autosuggestions",
+      "zsh-syntax-highlighting",
+    ]
 
 [paths]
     # Common path roots referenced by templates.

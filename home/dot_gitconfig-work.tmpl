@@ -4,3 +4,15 @@
 [user]
     name  = {{ .work.name }}
     email = {{ .work.email }}
+{{- if .work.signingkey }}
+    signingkey = {{ .work.signingkey }}
+
+[commit]
+    gpgsign = true
+
+[tag]
+    gpgsign = true
+
+[gpg]
+    program = gpg
+{{- end }}
