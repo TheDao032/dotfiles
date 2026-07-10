@@ -25,6 +25,16 @@
 [url "git@github.com:TMMFZ/"]
     insteadOf = https://github.com/TMMFZ/
 
+# Multi-account SSH rewrite: any `git@github.com:{{ .user.github }}/*` URL is
+# redirected to the `github-personal` SSH alias (see ~/.ssh/config). The default
+# `github.com` host picks up ~/.ssh/id_ed25519 which is registered on the WORK
+# account, so a push to a personal repo would return "permission denied to
+# <work-user>". This rewrite applies transparently to clone/fetch/push — no
+# per-repo `git remote set-url` needed on fresh machines.
+# Reference: [[../02-stack/ssh-multi-account]] and 2026-06-12 journal.
+[url "git@github-personal:{{ .user.github }}/"]
+    insteadOf = git@github.com:{{ .user.github }}/
+
 [credential]
     helper = osxkeychain
 
